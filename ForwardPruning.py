@@ -13,6 +13,7 @@ class ForwardPruning:
         for action in self.Actions(state):
             if action.value(v):
                 return action
+        return None
             
     def Max_Value(self, state, alpha, beta):
         if self.Probcut_Test(state):
@@ -36,7 +37,7 @@ class ForwardPruning:
             beta = min(beta, v)
         return v
     
-    def Probcut_Test(self, state, alpha, beta, nodes):
+    def Probcut_Test(self, state): #, alpha, beta):
         '''returns true for all depth greater than some fixed depth of d'''
         pass
     
