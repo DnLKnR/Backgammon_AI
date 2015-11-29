@@ -13,40 +13,43 @@ class CuttingOff:
         #Reset the node count
         self.node_count = 0
         #Begin the minimax search
-        v = self.Max_Value(state, -1, 193)
+        v,action = self.Max_Value(state, -1, 193)
         #Need a way to return the action that results in v
-        return None
+        return action
             
     def Max_Value(self, state, alpha, beta):
         if self.Cuttoff_Test(state, nodes):
-            return self.Utility(state)
+            return [self.Utility(state),state.action]
         v = -1
         for action in self.Actions(state):
             #Increment the node count by 1 since this action is being evaluated
             self.node_count += 1
-            v = max(v, self.Min_Value(self.Result(state, action), alpha, beta))
+            v = max([v], self.Min_Value(self.Result(state, action), alpha, beta), key=lambda x: x[0])
             if v >= beta:
-                return v
+                return [v,action]
             alpha = max(alpha, v)
-        return v
+        return [v,None]
     
     def Min_Value(self, state, alpha, beta):
         if self.Cuttoff_Test(state):
-            return self.Utility(state)
+            return [self.Utility(state),state.action]
         v = 193
         for action in self.Actions(state):
             #Increment the node count by 1 since this action is being evaluated
             self.node_count += 1
-            v = min(v, self.Max_Value(self.Result(state, action), alpha, beta))
+            v = min([v], self.Max_Value(self.Result(state, action), alpha, beta), key=lambda x: x[0])
             if v <= alpha:
-                return v
+                return [v,action]
             beta = min(beta, v)
-        return v
+        return [v,None]
     
     def Cuttoff_Test(self, state):
         '''returns true for all depth greater than some fixed depth of d
         OR if the state is terminal'''
-        if self.node_limit < self.node_count:
+        if state == None:
+            print("In Cutoff_Test: State is of NoneType, returning True")
+            return True
+        elif self.node_limit < self.node_count:
             return True
         elif state.isGameOver():
             return True

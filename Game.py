@@ -33,6 +33,8 @@ class State:
     def __init__(self, redBoard, whiteBoard):
         self.redBoard = redBoard
         self.whiteBoard = whiteBoard
+        #The last action performed on the state
+        self.action     = None
         
     def copy(self):
         '''creates a copy of this object'''
@@ -46,6 +48,7 @@ class State:
     
     def result(self, action):
         '''Returns a copy of the state with the action performed'''
+        self.action = action
         pass
     
     def actions(self):
