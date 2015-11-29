@@ -29,8 +29,39 @@ _____________________________________________________
 
 from random import randint
 
-class Game:
+class State:
+    def __init__(self, redBoard, whiteBoard):
+        self.redBoard = redBoard
+        self.whiteBoard = whiteBoard
+        
+    def copy(self):
+        '''creates a copy of this object'''
+        copy_redBoard = list(self.redBoard)
+        copy_whiteBoard = list(self.whiteBoard)
+        
+        return State(copy_redBoard, copy_whiteBoard)
+    
+    def evaluate(self, action, player):
+        return self.result(action).score(player)
+    
+    def result(self, action):
+        '''Returns a copy of the state with the action performed'''
+        pass
+    
+    def actions(self):
+        '''Returns a list of all possible actions from this state'''
+        pass
+    
+    def score(self, player):
+        '''Computes/returns the score for the specified player (r or w)'''
+        pass
+    
+    def isGameOver(self):
+        '''returns true if the state is terminal (game over), else false'''
+        pass
+    
 
+class Game:
     def __init__(self):
         self.redBoard = [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2]
         self.whiteBoard = [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2]

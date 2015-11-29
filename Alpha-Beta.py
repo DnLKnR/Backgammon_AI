@@ -32,7 +32,7 @@ class AlphaBeta:
     def Min_Value(self, state, alpha, beta):
         if self.Terminal_Test(state):
             return self.Utility(state)
-        v = -1
+        v = 193
         for action in self.Actions(state):
             v = min(v, self.Max_Value(self.Result(state, action), alpha, beta))
             if v <= alpha:
