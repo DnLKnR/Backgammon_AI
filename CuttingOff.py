@@ -9,7 +9,7 @@ class CuttingOff:
         self.node_limit = node_limit
         self.node_count = 0
         
-    def Search(self, state, nodes):
+    def Search(self, state):
         #Reset the node count
         self.node_count = 0
         #Begin the minimax search
@@ -18,7 +18,7 @@ class CuttingOff:
         return action
             
     def Max_Value(self, state, alpha, beta):
-        if self.Cuttoff_Test(state, nodes):
+        if self.Cuttoff_Test(state):
             return [self.Utility(state),state.action]
         v = -1
         for action in self.Actions(state):
@@ -44,7 +44,7 @@ class CuttingOff:
         return [v,None]
     
     def Cuttoff_Test(self, state):
-        '''returns true for all depth greater than some fixed depth of d
+        '''returns true for all nodes greater than some fixed nodes limit
         OR if the state is terminal'''
         if state == None:
             print("In Cutoff_Test: State is of NoneType, returning True")
