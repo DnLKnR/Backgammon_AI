@@ -8,20 +8,21 @@ class CuttingOff:
         self.player  = player
         self.node_limit = node_limit
         self.node_count = 0
+        self.diceroll   = [0,0]
         
-    def Search(self, state):
+    def Search(self, state, diceroll):
         #Reset the node count
         self.node_count = 0
         #Begin the minimax search
-        v,action = self.Max_Value(state, -1, 193)
+        v,action = self.Max_Value(state, -1, 193, diceroll)
         #Need a way to return the action that results in v
         return action
             
-    def Max_Value(self, state, alpha, beta):
+    def Max_Value(self, state, alpha, beta, diceroll):
         if self.Cuttoff_Test(state):
             return [self.Utility(state),state.action]
         v = -1
-        for action in self.Actions(state):
+        for action in self.Actions(state, diceroll):
             #Increment the node count by 1 since this action is being evaluated
             self.node_count += 1
             v = max([v], self.Min_Value(self.Result(state, action), alpha, beta), key=lambda x: x[0])
@@ -37,7 +38,7 @@ class CuttingOff:
         for action in self.Actions(state):
             #Increment the node count by 1 since this action is being evaluated
             self.node_count += 1
-            v = min([v], self.Max_Value(self.Result(state, action), alpha, beta), key=lambda x: x[0])
+            v = min([v], self.Max_Value(self.Result(state, action, None), alpha, beta), key=lambda x: x[0])
             if v <= alpha:
                 return [v,action]
             beta = min(beta, v)
@@ -65,9 +66,9 @@ class CuttingOff:
     def Actions(self, state):
         '''this function returns a list of all possible
         actions that can be applied to a state'''
-        return state.actions()
+        return state.actions(self.player)
     
     def Result(self, state, action):
         '''This function returns a state with the action
         applied to it'''
-        return state.result(action)
+        return state.result(action, self.player)

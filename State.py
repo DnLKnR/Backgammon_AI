@@ -9,12 +9,16 @@ class State:
         #The last action performed on the state
         self.action     = None
 '''
-rolls =    [[1,1 or 1,1],[1,2 or 2,1],[1,3 or 3,1],[1,4 or 4,1],[1,5 or 5,1],[1,6 or 6,1],
-            [dup]       ,[2,2 or 2,2],[2,3 or 3,2],[2,4 or 4,2],[2,5 or 5,2],[2,6 or 6,2],
-            [dup]       ,[dup]       ,[3,3 or 3,3],[3,4 or 4,3],[3,5 or 5,3],[3,6 or 6,3],
-            [dup]       ,[dup]       ,[dup]       ,[4,4 or 4,4],[4,5 or 5,4],[4,6 or 6,4],
-            [dup]       ,[dup]       ,[dup]       ,[dup]       ,[5,5 or 5,5],[5,6 or 6,5],
-            [dup]       ,[dup]       ,[dup]       ,[dup]       ,[dup]       ,[6,6 or 6,6]]
+Each index contains all possible actions for that dice roll.
+Roll a 5 and a 3, then actions will be at ...[2][4]
+
+rolls =    [[[1,1 or 1,1],[dup]       ,[dup]       ,[dup]       ,[dup]       ,[dup]       ],
+            [[1,2 or 2,1],[2,2 or 2,2],[dup]       ,[dup]       ,[dup]       ,[dup]       ],
+            [[1,3 or 3,1],[2,3 or 3,2],[3,3 or 3,3],[dup]       ,[dup]       ,[dup]       ],
+            [[1,4 or 4,1],[2,4 or 4,2],[3,4 or 4,3],[4,4 or 4,4],[dup]       ,[dup]       ],
+            [[1,5 or 5,1],[2,5 or 5,2],[3,5 or 5,3],[4,5 or 5,4],[5,5 or 5,5],[dup]       ],
+            [[1,6 or 6,1],[2,6 or 6,2],[3,6 or 6,3],[4,6 or 6,4],[5,6 or 6,5],[6,6 or 6,6]]]
+
 '''
     def get(self, player):
         if player.lower() == 'r':
@@ -44,11 +48,16 @@ rolls =    [[1,1 or 1,1],[1,2 or 2,1],[1,3 or 3,1],[1,4 or 4,1],[1,5 or 5,1],[1,
         
         return copy_state
     
-    def actions(self, player):
+    def actions(self, player, diceroll):
         '''Returns a list of all possible actions from this state'''
-        for die1 in range(1,7):
-            for die2 in range(die1,7):
-                pass
+        if diceroll == None:
+            for die2 in range(1,7):
+                for die1 in range(1, die2 + 1):
+                    '''This weird looping order will allow for use to 
+                       follow the desired setup for our matrix.
+                       Ex. (die1,die2) == (1,1) then (2,1) then (2,2) then (3,1)....etc'''
+                    
+                    pass
         '''
                 if player has pieces in bar
                     only generate moves from bar
@@ -70,7 +79,13 @@ rolls =    [[1,1 or 1,1],[1,2 or 2,1],[1,3 or 3,1],[1,4 or 4,1],[1,5 or 5,1],[1,
                             
                 
         '''
-        
+        else:
+            # Higher index first
+            die1,die2 = sorted(diceroll, reverse=True)
+            
+                
+            
+            pass
         pass
     
     def score(self, player):
