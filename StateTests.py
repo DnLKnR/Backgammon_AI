@@ -1,0 +1,23 @@
+from State import State
+
+#Start board
+#    0 1 2 3 4 5 6 7 8 910 1 2 3 4 5 6 7 8 920 1 2 3 4
+#r = [0,2,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,3,0,5,0,0,0,0,0]
+#w = [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2]
+#    0 1 2 3 4 5 6 7 8 910 1 2 3 4 5 6 7 8 920 1 2 3 4
+r = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
+w = [1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0]
+
+s = State(r, w)
+
+a = s.actions_Ver2("w", None)
+
+
+def printArray(array):
+    for i,row in enumerate(array):
+        for j,row2 in enumerate(row):
+            print("------------- Dice Roll {0},{1} or {1},{0} -------------".format(i + 1,j + 1))
+            for index,actionset in enumerate(row2):
+                print("Option {0}:\t{1}".format(index + 1,actionset))
+
+printArray(a)

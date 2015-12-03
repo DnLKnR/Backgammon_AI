@@ -42,8 +42,8 @@ class Game:
         
 
     def rollDice(self):
-        self.diceRolls[0] = Random.randint(1,6)
-        self.diceRolls[1] = Random.randint(1,6)
+        self.diceRolls[0] = randint(1,6)
+        self.diceRolls[1] = randint(1,6)
         return
 
     def whiteMove(self, movesList):
