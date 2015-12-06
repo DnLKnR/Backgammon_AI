@@ -53,104 +53,10 @@ class State:
         
         return copy_state
     
-    def actions(self, player, diceroll):
-        '''Returns a list of all possible actions from this state'''
-        print("test1")
-        if diceroll == None:
-            actions = initializeActionsArray()
-            print("test")
-            #return actions
-            if (player == "w"):
-                
-                #bar not empty
-                if (self.whiteBoard[0] >= 1):
-                    
-                    for die2 in range(1, 7):    
-                        move1 = (0, 0)
-                        
-                        #if move allowed
-                        if (self.redBoard[25 - die2] <= 1):
-                            move1 = (0, die2)
-                            
-                            #if more than one piece on bar
-                            if (self.whiteBoard[0] > 1):
-                                for die1 in range(1, die2 + 1):
-                                    move2 = (0, 0)
-                                    
-                                    #if move allowed
-                                    if (self.redBoard[25 - die1] <= 1):
-                                        move2 = (0, die1)
-                                        
-                                        actions[max(die1,die2) - 1][min(die1,die2) - 1] = [move1, move2]
-                            
-                            #all pieces off bar after move1
-                            else:
-                                for die1 in range(1,7):
-                                    move2 = (0, 0)
-                                    
-                                    #for each possible piece location
-                                    for i in range(1, 25):
-                                        
-                                        #if white can move from index i with die1
-                                        if (self.whiteBoard[i] >= 1 and i - die1 >= 0 and (i - die1 == 0 or self.redBoard[i - die1] <= 1)):
-                                            move2 = (i, die2)
-                                        
-                                            #Add lowest index die first
-                                            #if (die1 <= die2):
-                                            actions[max(die1,die2) - 1][min(die1,die2) - 1].append([move1, move2])
-                                            #else:
-                                            #    actions[die2 - 1][die1 - 1].append((move1, move2))
-                #bar empty
-                else:
-                    for die2 in range (1, 7):
-                        move1 = (0, 0)
-                        
-                        #for each possible piece location
-                        for i in range (1, 25):
-                            
-                            #if white can move from index i with die2
-                            if (self.whiteBoard[i] >= 1 and i - die2 >= 0 and self.redBoard[i - die2] <= 1):
-                                move1 = (i, die2)
-                                
-                                for die1 in range (1, die2 + 1):
-                                        move2 = (0, 0)
-                                        
-                                        #for each possible piece location
-                                        for j in range (1,25):
-                                            
-                                            if (i == j):
-                                                
-                                                #if white can move from index i with die2
-                                                if (self.whiteBoard[j] >= 2 and j - die1 >= 0 and (j - die1 == 0 or self.redBoard[j - die1] <= 1)):
-                                                    move2 = (j,die1)
-                                                    #print("x: {0}, y: {1}".format(max(die1,die2) - 1,min(die1,die2) - 1))        
-                                                    actions[max(die1,die2) - 1][min(die1,die2) - 1].append([move1,move2])
-                                            
-                                            else:
-                                                #if white can move from index i with die2
-                                                if (self.whiteBoard[j] >= 1 and j - die1 >= 0 and (j - die1 == 0 or self.redBoard[j - die1] <= 1)):
-                                                    move2 = (j,die1)
-                                                            
-                                                    actions[max(die1,die2) - 1][min(die1,die2) - 1].append([move1,move2])
-                          
-                return actions              
-            else: #player == r mimic white ^
-                
-                pass
-            
-            return actions
-            
-        else:
-            # Higher index first
-            die1,die2 = sorted(diceroll, reverse=True)
-            
-                
-            
-            pass
-        pass
-    
-    
     def actions_Ver2(self, player, diceroll):
+        '''Returns a list of all possible actions from this state'''
+        
+        
         '''
         What if we did it like this?  
         We can do and undo the first move so we don't have to create copies of the board
@@ -195,6 +101,8 @@ class State:
                         #print("After Action:\t{0}".format(boards[player_index]))
                         ''' Get the second actions '''
                         second_actions = self.moves(die2, boards, player_index)
+                        if(len(second_actions) == 0):
+                            all_actions[max(die1,die2) - 1][min(die1,die2) - 1].append([first_action,(0,0)])
                         ''' Store the action set '''
                         for second_action in second_actions:
                             all_actions[max(die1,die2) - 1][min(die1,die2) - 1].append([first_action,second_action])
@@ -231,12 +139,12 @@ class State:
             move1 = (0, 0)
             
             #if move allowed
-            if (boards[player_index][25 - die] <= 1):
+            if (boards[enemy_index][25 - die] <= 1):
                 moves_list.append((0, die))
         else:
             for i in range (1, 25):
                 #if white can move from index i with die2
-                if (boards[player_index][i] >= 1 and i - die >= 0 and boards[enemy_index][i - die] <= 1):
+                if (boards[player_index][i] > 0 and i - die > -1 and boards[enemy_index][i - die] < 2):
                     moves_list.append((i, die))
         return moves_list
     
@@ -246,10 +154,15 @@ class State:
         undos = []
         i,j  = move
         #make sure we don't go back last index
-        index = ((i + j) % 25)
-        #if we rolled over last index, skip 0 (bar)
-        if (i + j) > index:
-            index += 1
+        if (player_index == 0):
+            index = i + j
+            if index < 1 or index > 25:
+                return undos
+        else:
+            index = i - j
+            if index < 1 or index > 25:
+                return undos
+                
         boards[player_index][index]  += 1
         boards[player_index][i]      -= 1
         undos.append((index,i,player_index))
@@ -278,7 +191,23 @@ class State:
     
     def isGameOver(self):
         '''returns true if the state is terminal (game over), else false'''
-        pass
+        redWon = True
+        for i in range(24):
+            if self.redBoard[i] > 0:
+                redWon = False
+                break
+        if redWon:
+            print("Red wins!")
+            return True
+            
+        whiteWon = True
+        for i in range(24):
+            if self.whiteBoard[i] > 0:
+                whiteWon = False
+                break
+        if whiteWon:
+            print("White wins!")
+            return True
 
 def initializeActionsArray():
     array = [[[] for i in range(1, j + 1)] for j in range(1, 7)]
