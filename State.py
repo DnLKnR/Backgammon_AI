@@ -175,20 +175,16 @@ class State:
         #Check if move is not bearing off
         if j != -1:
             self.boards[player][j]  += 1
-            self.boards[player][i]  -= 1
-            undos.append((j,i,player))
-            #If enemy player has a piece there, put them on bar
-            if self.boards[enemy][j] == 1:
-                #Remove from the old piece index
-                self.boards[enemy][j] -= 1
-                #Add to the new piece index, (the bar)
-                self.boards[enemy][0] += 1
-                #Provide undo tuple, (new index, old index, board index)
-                undos.append((0,j,enemy))
-        else:
-            #Move is bearing off, piece is thus removed
-            self.boards[player][i]  -= 1
-            undos.append((-1,i,player))
+        self.boards[player][i]  -= 1
+        undos.append((j,i,player))
+        #If enemy player has a piece there, put them on bar
+        if self.boards[enemy][j] == 1 and j != -1:
+            #Remove from the old piece index
+            self.boards[enemy][j] -= 1
+            #Add to the new piece index, (the bar)
+            self.boards[enemy][0] += 1
+            #Provide undo tuple, (new index, old index, board index)
+            undos.append((0,j,enemy))
         #return the special formatted actions
         return undos
     
