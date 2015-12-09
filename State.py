@@ -199,6 +199,7 @@ class State:
         
         barConst = 5
         doorConst = 1
+        bearConst = 10
         
         enemy = int(not player)
         scores = [0,0]
@@ -220,9 +221,12 @@ class State:
             if self.boards[1][index] > 1:
                 scores[1] += doorConst
                 
-                
+        if self.isBearingOff(0):
+            scores[0] += bearConst
+        if self.isBearingOff(1):
+            scores[1] += bearConst  
         
-        value =  scores[enemy] - scores[player]
+        value =  scores[player] - scores[enemy]
         
         return value
     

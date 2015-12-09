@@ -7,36 +7,45 @@ class CuttingOff:
         self.alpha   = alpha
         self.beta    = beta
         self.max_depth = max_depth
-        self.action = None
         
     def Search(self, state, player, diceroll):
+        #Set attributes to store player index and enemy index for boards
+        self.player = player
+        self.enemy  = int(not player)
+        #Reset action to None
+        self.action = None
         #Begin the minimax search
-        v = self.Max_Value(state, self.alpha, self.beta, 0, player, diceroll)
+        v = self.Max_Value(state, self.alpha, self.beta, 0, diceroll)
         #Need a pick best first move if self.action is still Null...
-        
+        if self.action == None:
+            print("Action returned is None...TODO: Handle it")
         
         #Need a way to return the action that results in v
         return self.action
             
-    def Max_Value(self, state, alpha, beta, depth, player, diceroll):
+    def Max_Value(self, state, alpha, beta, depth, diceroll):
         if self.Cuttoff_Test(state, depth + 1):
-            value = state.score(player)
+            value = state.score(self.player)
             return value
         v = -193
-        enemy  = int(not player)
         if diceroll == None:
             """actionss = state.actions(player, diceroll)
             self.printArray(actionss)"""
-            for actions in state.actions(player, diceroll):
+            for actions in state.actions(self.player, diceroll):
                 
                 total_value = 0
                 #print("All actions: " + str(actions))
                 for die1 in range(len(actions)):
                     for die2 in range(len(actions[die1])):
-                        undo_actions = state.result(actions[die1][die2], player)
-                        temp = self.Min_Value(state, alpha, beta, depth + 1, enemy)
+                        if len(actions[die1][die2]) == 0:
+                            continue
+                        undo_actions = state.result(actions[die1][die2], self.player)
+                        temp = self.Min_Value(state, alpha, beta, depth + 1)
                         state.undo(undo_actions)
-                        total_value += (1/18) * temp
+                        probability = 1/18
+                        if die1 == die2:
+                            probability = 1/36
+                        total_value += probability * temp
                 #Increment the node count by 1 since this action is being evaluated
                 #self.node_count += 1
                 v = max(v, total_value)
@@ -46,11 +55,10 @@ class CuttingOff:
                 alpha = max(alpha, v)
         else:
             die1,die2 = diceroll
-            actions = state.actions(player, diceroll)
-            for action in actions:
-                print("Action return from roll: " + str(action))
-                undo_actions = state.result(action, player)
-                total_value = self.Min_Value(state, alpha, beta, depth + 1, enemy)
+            for action in state.actions(self.player, diceroll):
+                print("Testing the following action: " + str(action))
+                undo_actions = state.result(action, self.player)
+                total_value = self.Min_Value(state, alpha, beta, depth + 1)
                 state.undo(undo_actions)
                 
                 v = max(v, total_value)
@@ -63,18 +71,19 @@ class CuttingOff:
             
         return v
     
-    def Min_Value(self, state, alpha, beta, depth, player):
+    def Min_Value(self, state, alpha, beta, depth):
         if self.Cuttoff_Test(state, depth + 1):
-            value = state.score(player)
+            #Always produce score based off AI side
+            value = state.score(self.player)
             return value
         v     = 193
-        enemy = int(not player)
-        for actions in state.actions(player, None):
+        #Produce the enemy's actions
+        for actions in state.actions(self.enemy, None):
             total_value = 0
             for die1 in range(len(actions)):
                 for die2 in range(len(actions[die1])):
-                    undo_actions = state.result(actions[die1][die2], player)
-                    value        = self.Max_Value(state, alpha, beta, depth + 1, enemy, None)
+                    undo_actions = state.result(actions[die1][die2], self.enemy)
+                    value        = self.Max_Value(state, alpha, beta, depth + 1, None)
                     state.undo(undo_actions)
                     total_value += (1/18) * value
                     

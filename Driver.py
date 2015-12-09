@@ -90,11 +90,12 @@ class Driver:
                 break
             #Player Input Loop and values
             dice            = [random.randint(1,6),random.randint(1,6)]
-            all_moves       = [self.state.moves(dice[0], self.player),self.state.moves(dice[1], self.player)]
-            possible_moves = all_moves[0] + all_moves[1]
             invalid = True
             moves = 2
             while moves > 0:
+                possible_moves = []
+                for die in dice:
+                    possible_moves += self.state.moves(die, self.player)
                 if self.state.isGameOver():
                     not_game_over = False
                     break
@@ -128,10 +129,7 @@ class Driver:
                     self.state.do((i,j), self.player)
                     remove_index  = dice.index(die)
                     dice.pop(remove_index)
-                    all_moves.pop(remove_index)
-                    possible_moves = []
-                    for move_list in all_moves:
-                        possible_moves += move_list
+                    
             #Print the board for the player to see!
             writeBoard(self.state.redBoard, self.state.whiteBoard)
             #AI Action
@@ -140,8 +138,6 @@ class Driver:
             action          = self.AI.Search(self.state, self.enemy, dice)
             self.state.result(action, self.enemy)
             print("Computer has performed the following moves: {0}".format(action))
-            #Print the board for the player to see!
-            writeBoard(self.state.redBoard, self.state.whiteBoard)
             
         if self.getWinner() == "w":
             print("White Wins!!!")
