@@ -36,7 +36,7 @@ class State:
         return State(copy_redBoard, copy_whiteBoard)
     
     def evaluate(self, action, player):
-        undo_actions = self.result(action)
+        undo_actions = self.result(action, player)
         value        = self.score(player)
         self.undo(undo_actions)
         return value
@@ -67,7 +67,7 @@ class State:
         #If a dice roll isn't given
         if diceroll == None:
             #Store all actions
-            all_actions  = initializeActionsArray()
+            all_actions  = self.initializeActionsArray()
             for die1 in range(1,7):
                 for first_action in self.moves(die1, player):
                 #first_actions = self.moves(die1, boards, player_index)
@@ -218,7 +218,7 @@ class State:
             print("White wins!")
             return True
 
-def initializeActionsArray():
-    array = [[[] for i in range(1, j + 1)] for j in range(1, 7)]
-    return array
+    def initializeActionsArray(self):
+        array = [[[] for i in range(1, j + 1)] for j in range(1, 7)]
+        return array
     
