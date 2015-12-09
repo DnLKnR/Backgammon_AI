@@ -12,9 +12,9 @@ s = State(r, w)
 
 a = s.actions(1, None)
 
-CO = CuttingOff(0, "w", 3)
+CO = CuttingOff(0, "w", 4)
 
-print("Action from search: " + str(CO.Search(s,1,[1,6])))
+print("Action from search: " + str(CO.Search(s,0,[1,6])))
 
 '''
 def printArray(array):

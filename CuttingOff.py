@@ -11,7 +11,7 @@ class CuttingOff:
         
     def Search(self, state, player, diceroll):
         #Begin the minimax search
-        v = self.Max_Value(state, 1, -1, 0, player, diceroll)
+        v = self.Max_Value(state, 193, 2, 0, player, diceroll)
         #Need a pick best first move if self.action is still Null...
         
         
