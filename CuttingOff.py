@@ -8,73 +8,73 @@ class CuttingOff:
         self.player  = player
         self.max_depth = max_depth
         self.action = None
-        #self.node_limit = node_limit
-        #self.node_count = 0
-        #self.diceroll   = [0,0]
         
-    def Search(self, state, diceroll):
-        #Reset the node count
-        self.node_count = 0
+    def Search(self, state, player, diceroll):
         #Begin the minimax search
-        v = self.Max_Value(state, -193, 193, 0, diceroll)
+        v = self.Max_Value(state, -193, 193, 0, player, diceroll)
         #Need a way to return the action that results in v
-        return v
+        return self.action
             
-    def Max_Value(self, state, alpha, beta, depth, diceroll):
+    def Max_Value(self, state, alpha, beta, depth, player, diceroll):
         if self.Cuttoff_Test(state, depth + 1):
-            return self.Utility(state)
+            value = state.score([state.redBoard,state.whiteBoard], player)
+            return value
         v = -193
-        
-        
         if diceroll == None:
-            for actions in self.Actions(state, diceroll):
-                count = 0
-                total_v = 0
+            for actions in state.actions(player, diceroll):
+                total_value = 0
                 #print("All actions: " + str(actions))
                 for die1 in range(len(actions)):
                     for die2 in range(len(actions[die1])):
-                        temp = self.Min_Value(self.Result(state, actions[die1][die2]), alpha, beta, depth + 1)
-                        total_v += (1/18) * temp
+                        action = actions[die1][die2]
+                        enemy  = int(not player)
+                        temp = self.Min_Value(state.result(action, player), alpha, beta, depth + 1, enemy)
+                        total_value += (1/18) * temp
                 #Increment the node count by 1 since this action is being evaluated
                 #self.node_count += 1
-                v = max(v, total_v)
+                v = max(v, total_value)
                 #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
                 if v >= beta:
                     return v
                 alpha = max(alpha, v)
         else:
             die1,die2 = diceroll
-            for actions in self.Actions(state, diceroll)[max(die1,die2) - 1][min(die1,die2) - 1]:
-                print("Action return from roll: " + str(actions))
-                total_v = self.Min_Value(self.Result(state, actions), alpha, beta, depth + 1)
+            actions = state.actions(player, diceroll)[max(die1,die2) - 1][min(die1,die2) - 1]
+            for action in actions:
+                print("Action return from roll: " + str(action))
+                enemy  = int(not player)
+                total_value = self.Min_Value(state.result(action, player), alpha, beta, depth + 1, enemy)
                 #total_v += temp
                 #Increment the node count by 1 since this action is being evaluated
                 #self.node_count += 1
-                v = max(v, total_v)
+                v = max(v, total_value)
                 #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
                 if v >= beta:
-                    self.action = actions
+                    self.action = action
                     return v
                 alpha = max(alpha, v)
             
         return v
     
-    def Min_Value(self, state, alpha, beta, depth):
+    def Min_Value(self, state, alpha, beta, depth, player):
         if self.Cuttoff_Test(state, depth + 1):
-            return self.Utility(state)
+            value = state.score([state.redBoard,state.whiteBoard], player)
+            return value
         v = 193
-        for actions in self.Actions(state, None):
-            count = 0
-            total_v = 0
+        for actions in state.actions(player, None):
+            total_value = 0
             for die1 in range(len(actions)):
                 for die2 in range(len(actions[die1])):
-                    temp = self.Max_Value(self.Result(state, actions[die1][die2]), alpha, beta, depth + 1, None)
-                    total_v += (1/18) * temp
-            #Increment the node count by 1 since this action is being evaluated
-            v = min(v, total_v)
-            #self.node_count += 1
-            #v,a = min([v], self.Max_Value(self.Result(state, action), alpha, beta, depth + 1, None), key=lambda x: x[0])
+                    
+                    action       = actions[die1][die2]
+                    enemy        = int(not player)
+                    value        = self.Max_Value(state.result(action, player), alpha, beta, depth + 1, enemy, None)
+                    total_value += (1/18) * value
+                    
+            v = min(v, total_value)
+            
             if v <= alpha:
+                self.action = action
                 return v
             beta = min(beta, v)
         return v
@@ -92,22 +92,22 @@ class CuttingOff:
         else:
             return False
     
-    def Utility(self, state):
+    def Utility(self, state, player):
         '''this function assigns a value to a state, based on the
         player, which can be passed to this object at the start
         and checked via self.player'''
-        player_index = int(self.player == "w")
-        return state.score([state.redBoard,state.whiteBoard], player_index)
+        #player_index = int(not player)
+        return state.score([state.redBoard,state.whiteBoard], player)
     
-    def Actions(self, state, diceroll):
+    def Actions(self, state, player, diceroll):
         '''this function returns a list of all possible
         actions that can be applied to a state'''
-        return state.actions(self.player, diceroll)
+        return state.actions(player, diceroll)
     
-    def Result(self, state, action):
+    def Result(self, state, action, player):
         '''This function returns a state with the action
         applied to it'''
-        return state.result(action, self.player)
+        return state.result(action, player)
 
 
 class Node:

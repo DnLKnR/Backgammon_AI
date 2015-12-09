@@ -6,6 +6,7 @@ class State:
     def __init__(self, redBoard, whiteBoard):
         self.redBoard   = redBoard
         self.whiteBoard = whiteBoard
+        self.boards = [redBoard, whiteBoard]
         #The last action performed on the state
         self.action     = None
 
@@ -26,12 +27,7 @@ class State:
     '''
 
     def get(self, player):
-        if player.lower() == 'r':
-            return self.redBoard
-        elif player.lower() == 'w':
-            return self.whiteBoard
-        else:
-            return None
+        return self.boards[player]
     
     def copy(self):
         '''creates a copy of this object'''
@@ -52,64 +48,30 @@ class State:
                 continue
             i,j          = move
             board[i]     -= 1
-            if player:
-                board[i - j] += 1
-                
-            else:
-                board[i + j] += 1
+            board[j]     += 1
         copy_state.action = action
         
         return copy_state
     
     def actions(self, player, diceroll):
         '''Returns a list of all possible actions from this state'''
-        
-        
-        '''
-        What if we did it like this?  
-        We can do and undo the first move so we don't have to create copies of the board
-        
-        And second actions will always be performed on a board that already has the first action performed, right?
-        
-        
-        Pseudocode:
-        
-        loop through dice rolls:
-        
-            first_actions <- get all possible first moves with first die
-            
-            for first_action in the first_actions:
-            
-                apply first_action to board(s)
-                
-                second_actions <- get all possible second moves given the new board with second die
-                
-                for second_action in second_actions:
-                    actions[max(die1,die2)-1][min(die1,die2) - 1].append([first_action,second_action])
-                    
-                undo first_action from board(s)
-                    
-                    
-            
-        '''
+
         boards = [self.redBoard,self.whiteBoard]
-        #player_index is 0 if red, 1 if white
-        player_index = int(player == "w")
         #Store all actions
         all_actions  = initializeActionsArray()
         #If a dice roll isn't given
         if diceroll == None:
             for die1 in range(1,7):
-                for first_action in self.moves(die1, boards, player_index):
+                for first_action in self.moves(die1, boards, player):
                 #first_actions = self.moves(die1, boards, player_index)
                     for die2 in range(1,7):
                     #for first_action in first_actions:
                         ''' Apply first action to the board(s) '''
                         #print("Before Action:\t{0}".format(boards[player_index]))
-                        undo_actions = self.do(first_action, boards, player_index)
+                        undo_actions = self.do(first_action, boards, player)
                         #print("After Action:\t{0}".format(boards[player_index]))
                         ''' Get the second actions '''
-                        second_actions = self.moves(die2, boards, player_index)
+                        second_actions = self.moves(die2, boards, player)
                         if(len(second_actions) == 0):
                             all_actions[max(die1,die2) - 1][min(die1,die2) - 1].append([first_action,(0,0)])
                         ''' Store the action set '''
@@ -122,14 +84,14 @@ class State:
         #if a dice roll is provided
         else:
             die1,die2     = diceroll
-            first_actions = self.moves(die1, boards, player_index)
+            first_actions = self.moves(die1, boards, player)
             for first_action in first_actions:
                 ''' Apply first action to the board(s) '''
                 #print("Before Action:\t{0}".format(boards[player_index]))
-                undo_actions = self.do(first_action, boards, player_index)
+                undo_actions = self.do(first_action, boards, player)
                 #print("After Action:\t{0}".format(boards[player_index]))
                 ''' Get the second actions '''
-                second_actions = self.moves(die2, boards, player_index)
+                second_actions = self.moves(die2, boards, player)
                 ''' Store the action set '''
                 for second_action in second_actions:
                     all_actions[max(die1,die2) - 1][min(die1,die2) - 1].append([first_action,second_action])
@@ -145,16 +107,29 @@ class State:
         moves_list   = []
          #bar not empty
         if (boards[player_index][0] >= 1):
-            move1 = (0, 0)
-            
             #if move allowed
-            if (boards[enemy_index][25 - die] <= 1):
-                moves_list.append((0, die))
+            if player_index == 0:
+                if (boards[enemy_index][25 - die] <= 1):
+                    moves_list.append((0, 25 - die))
+                
+            elif player_index == 1:
+                if (boards[enemy_index][die] <= 1):
+                    moves_list.append((0, die))
         else:
             for i in range (1, 25):
                 #if white can move from index i with die2
-                if (boards[player_index][i] > 0 and i - die > -1 and boards[enemy_index][i - die] < 2):
-                    moves_list.append((i, die))
+                if player_index == 0:
+                    if (boards[player_index][i] > 0 and i + die < 24 and boards[enemy_index][i + die] < 2):
+                        j = i + die
+                        if j > 24:
+                            continue
+                        moves_list.append((i, j))
+                if player_index == 1:
+                    if (boards[player_index][i] > 0 and i - die > 0 and boards[enemy_index][i - die] < 2):
+                        j = i - die
+                        if j < 1:
+                            continue
+                        moves_list.append((i, j))
         return moves_list
     
     def do(self, move, boards, player_index):
@@ -163,26 +138,26 @@ class State:
         undos = []
         i,j  = move
         #make sure we don't go back last index
-        if (player_index == 0):
-            index = i + j
-            if index < 1 or index > 24:
-                return undos
-        else:
-            index = i - j
-            if index < 1 or index > 24:
-                return undos
+        #if (player_index == 0):
+        #    index = i + j
+        #    if index < 1 or index > 24:
+        #        return undos
+        #else:
+        #    index = i - j
+        #    if index < 1 or index > 24:
+        #        return undos
                 
-        boards[player_index][index]  += 1
+        boards[player_index][j]  += 1
         boards[player_index][i]      -= 1
-        undos.append((index,i,player_index))
+        undos.append((j,i,player_index))
         #If enemy player has a piece there, put them on bar
-        if boards[enemy_index][index] == 1:
+        if boards[enemy_index][j] == 1:
             #Remove from the old piece index
-            boards[enemy_index][index] -= 1
+            boards[enemy_index][j] -= 1
             #Add to the new piece index, (the bar)
-            boards[enemy_index][0]     += 1
+            boards[enemy_index][0] += 1
             #Provide undo tuple, (new index, old index, board index)
-            undos.append((0,index,enemy_index))
+            undos.append((0,j,enemy_index))
         #return the special formatted actions
         return undos
     

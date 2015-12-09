@@ -14,7 +14,7 @@ a = s.actions(1, None)
 
 CO = CuttingOff(0, "w", 3)
 
-print("Action from search: " + str(CO.Search(s,[1,6])))
+print("Action from search: " + str(CO.Search(s,1,[1,6])))
 
 '''
 def printArray(array):
