@@ -11,7 +11,10 @@ class CuttingOff:
         
     def Search(self, state, player, diceroll):
         #Begin the minimax search
-        v = self.Max_Value(state, -193, 193, 0, player, diceroll)
+        v = self.Max_Value(state, 1, -1, 0, player, diceroll)
+        #Need a pick best first move if self.action is still Null...
+        
+        
         #Need a way to return the action that results in v
         return self.action
             
@@ -48,6 +51,7 @@ class CuttingOff:
                 #Increment the node count by 1 since this action is being evaluated
                 #self.node_count += 1
                 v = max(v, total_value)
+                print("New V is: " + str(v))
                 #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
                 if v >= beta:
                     self.action = action
@@ -74,7 +78,6 @@ class CuttingOff:
             v = min(v, total_value)
             
             if v <= alpha:
-                self.action = action
                 return v
             beta = min(beta, v)
         return v
