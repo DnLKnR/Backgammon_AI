@@ -12,7 +12,7 @@ s = State(r, w)
 
 a = s.actions(1, None)
 
-CO = CuttingOff(0, "w", 4)
+CO = CuttingOff(193, 2, 4)
 
 print("Action from search: " + str(CO.Search(s,0,[1,6])))
 

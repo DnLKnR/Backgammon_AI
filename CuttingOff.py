@@ -3,15 +3,15 @@ node counting instead.  We can have cutting
 off search do node counting instead of depth'''
 
 class CuttingOff:
-    def __init__(self, initial, player, max_depth):
-        self.initial = initial
-        self.player  = player
+    def __init__(self, alpha, beta, max_depth):
+        self.alpha   = alpha
+        self.beta    = beta
         self.max_depth = max_depth
         self.action = None
         
     def Search(self, state, player, diceroll):
         #Begin the minimax search
-        v = self.Max_Value(state, 193, 2, 0, player, diceroll)
+        v = self.Max_Value(state, self.alpha, self.beta, 0, player, diceroll)
         #Need a pick best first move if self.action is still Null...
         
         
@@ -20,18 +20,19 @@ class CuttingOff:
             
     def Max_Value(self, state, alpha, beta, depth, player, diceroll):
         if self.Cuttoff_Test(state, depth + 1):
-            value = state.score([state.redBoard,state.whiteBoard], player)
+            value = state.score(player)
             return value
         v = -193
+        enemy  = int(not player)
         if diceroll == None:
             for actions in state.actions(player, diceroll):
                 total_value = 0
                 #print("All actions: " + str(actions))
                 for die1 in range(len(actions)):
                     for die2 in range(len(actions[die1])):
-                        action = actions[die1][die2]
-                        enemy  = int(not player)
-                        temp = self.Min_Value(state.result(action, player), alpha, beta, depth + 1, enemy)
+                        undo_actions = state.result(actions[die1][die2], player)
+                        temp = self.Min_Value(state, alpha, beta, depth + 1, enemy)
+                        state.undo(undo_actions)
                         total_value += (1/18) * temp
                 #Increment the node count by 1 since this action is being evaluated
                 #self.node_count += 1
@@ -42,14 +43,13 @@ class CuttingOff:
                 alpha = max(alpha, v)
         else:
             die1,die2 = diceroll
-            actions = state.actions(player, diceroll)[max(die1,die2) - 1][min(die1,die2) - 1]
+            actions = state.actions(player, diceroll)
             for action in actions:
                 print("Action return from roll: " + str(action))
-                enemy  = int(not player)
-                total_value = self.Min_Value(state.result(action, player), alpha, beta, depth + 1, enemy)
-                #total_v += temp
-                #Increment the node count by 1 since this action is being evaluated
-                #self.node_count += 1
+                undo_actions = state.result(action, player)
+                total_value = self.Min_Value(state, alpha, beta, depth + 1, enemy)
+                state.undo(undo_actions)
+                
                 v = max(v, total_value)
                 print("New V is: " + str(v))
                 #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
@@ -62,17 +62,17 @@ class CuttingOff:
     
     def Min_Value(self, state, alpha, beta, depth, player):
         if self.Cuttoff_Test(state, depth + 1):
-            value = state.score([state.redBoard,state.whiteBoard], player)
+            value = state.score(player)
             return value
-        v = 193
+        v     = 193
+        enemy = int(not player)
         for actions in state.actions(player, None):
             total_value = 0
             for die1 in range(len(actions)):
                 for die2 in range(len(actions[die1])):
-                    
-                    action       = actions[die1][die2]
-                    enemy        = int(not player)
-                    value        = self.Max_Value(state.result(action, player), alpha, beta, depth + 1, enemy, None)
+                    undo_actions = state.result(actions[die1][die2], player)
+                    value        = self.Max_Value(state, alpha, beta, depth + 1, enemy, None)
+                    state.undo(undo_actions)
                     total_value += (1/18) * value
                     
             v = min(v, total_value)
