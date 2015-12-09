@@ -16,11 +16,7 @@ class CuttingOff:
         self.action = None
         #Begin the minimax search
         v = self.Max_Value(state, self.alpha, self.beta, 0, diceroll)
-        #Need a pick best first move if self.action is still Null...
-        if self.action == None:
-            print("Going with alternative action")
-            return self.alt_action
-        #Need a way to return the action that results in v
+        #Return the stored action from the search
         return self.action
             
     def Max_Value(self, state, alpha, beta, depth, diceroll):
@@ -57,20 +53,19 @@ class CuttingOff:
         else:
             die1,die2 = diceroll
             for action in state.actions(self.player, diceroll):
-                print("Testing the following action: " + str(action))
                 undo_actions = state.result(action, self.player)
                 total_value = self.Min_Value(state, alpha, beta, depth + 1)
                 state.undo(undo_actions)
-                
+                print("For Action = {0}, V is: {1}".format(action, total_value))
                 v = max(v, total_value)
-                print("New V is: " + str(v))
+                
                 #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
                 if v >= beta:
                     self.action = action
                     return v
                 elif v > v_max:
                     v_max = v
-                    self.alt_action = action
+                    self.action = action
                     
                 alpha = max(alpha, v)
             
