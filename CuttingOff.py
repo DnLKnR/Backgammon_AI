@@ -7,6 +7,7 @@ class CuttingOff:
         self.initial = initial
         self.player  = player
         self.max_depth = max_depth
+        self.action = None
         #self.node_limit = node_limit
         #self.node_count = 0
         #self.diceroll   = [0,0]
@@ -15,35 +16,68 @@ class CuttingOff:
         #Reset the node count
         self.node_count = 0
         #Begin the minimax search
-        v,action = self.Max_Value(state, -1, 193, 0, diceroll)
+        v = self.Max_Value(state, -193, 193, 0, diceroll)
         #Need a way to return the action that results in v
-        return action
+        return v
             
     def Max_Value(self, state, alpha, beta, depth, diceroll):
         if self.Cuttoff_Test(state, depth + 1):
-            return [self.Utility(state),state.action]
-        v = -1
-        for action in self.Actions(state, diceroll):
-            #Increment the node count by 1 since this action is being evaluated
-            self.node_count += 1
-            v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
-            if v >= beta:
-                return [v,action]
-            alpha = max(alpha, v)
-        return [v,None]
+            return self.Utility(state)
+        v = -193
+        
+        
+        if diceroll == None:
+            for actions in self.Actions(state, diceroll):
+                count = 0
+                total_v = 0
+                #print("All actions: " + str(actions))
+                for die1 in range(len(actions)):
+                    for die2 in range(len(actions[die1])):
+                        temp = self.Min_Value(self.Result(state, actions[die1][die2]), alpha, beta, depth + 1)
+                        total_v += (1/18) * temp
+                #Increment the node count by 1 since this action is being evaluated
+                #self.node_count += 1
+                v = max(v, total_v)
+                #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
+                if v >= beta:
+                    return v
+                alpha = max(alpha, v)
+        else:
+            die1,die2 = diceroll
+            for actions in self.Actions(state, diceroll)[max(die1,die2) - 1][min(die1,die2) - 1]:
+                print("Action return from roll: " + str(actions))
+                total_v = self.Min_Value(self.Result(state, actions), alpha, beta, depth + 1)
+                #total_v += temp
+                #Increment the node count by 1 since this action is being evaluated
+                #self.node_count += 1
+                v = max(v, total_v)
+                #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
+                if v >= beta:
+                    self.action = actions
+                    return v
+                alpha = max(alpha, v)
+            
+        return v
     
     def Min_Value(self, state, alpha, beta, depth):
         if self.Cuttoff_Test(state, depth + 1):
-            return [self.Utility(state),state.action]
+            return self.Utility(state)
         v = 193
-        for action in self.Actions(state, player, None):
+        for actions in self.Actions(state, None):
+            count = 0
+            total_v = 0
+            for die1 in range(len(actions)):
+                for die2 in range(len(actions[die1])):
+                    temp = self.Max_Value(self.Result(state, actions[die1][die2]), alpha, beta, depth + 1, None)
+                    total_v += (1/18) * temp
             #Increment the node count by 1 since this action is being evaluated
-            self.node_count += 1
-            v,a = min([v], self.Max_Value(self.Result(state, action), alpha, beta, depth + 1, None), key=lambda x: x[0])
+            v = min(v, total_v)
+            #self.node_count += 1
+            #v,a = min([v], self.Max_Value(self.Result(state, action), alpha, beta, depth + 1, None), key=lambda x: x[0])
             if v <= alpha:
-                return [v, action]
+                return v
             beta = min(beta, v)
-        return [val,act]
+        return v
     
     def Cuttoff_Test(self, state, depth):
         '''returns true for all nodes greater than some fixed nodes limit
@@ -62,7 +96,8 @@ class CuttingOff:
         '''this function assigns a value to a state, based on the
         player, which can be passed to this object at the start
         and checked via self.player'''
-        return state.score(self.player)
+        player_index = int(self.player == "w")
+        return state.score([state.redBoard,state.whiteBoard], player_index)
     
     def Actions(self, state, diceroll):
         '''this function returns a list of all possible
@@ -94,7 +129,7 @@ class MiniMaxBFS:
         self.node_count = 0
         Min_Queue = []
         Max_Queue = []
-        
+        value = 0
         next_actions = state.actions(player, diceroll)
         for index,action in enumerate(next_actions):
             new_state = state.result(action, player)
@@ -138,7 +173,7 @@ class MiniMaxBFS:
         
                 
         #sorted(Max_Queue, key=lambda x: x.value)
-    def computeBestState(queue, actions):
+    def computeBestState(self, queue, actions):
         sorted(queue, key=lambda x: x.parent)
         next_values = []
         count = 0
@@ -147,15 +182,13 @@ class MiniMaxBFS:
             value = 0
             for j in range(count,length):
                 if queue[j].parent != i:
-                    next_values.append(value/(j - count)
-                    
-                    break
+                    next_values.append(value/(j - count))
                 else:
                     count += 1
                     value += queue[j].value
         maxv = -100000000
         action_index = 0
-        for i in range(len(next_actions)):
+        for i in range(len(actions)):
             if maxv < value[i]:
                 maxv = value[i]
                 action_index = i

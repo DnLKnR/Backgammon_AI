@@ -47,13 +47,21 @@ class State:
         copy_state = self.copy()
         board = copy_state.get(player)
         for move in action:
+            if len(move) != 2:
+                print(action)
+                continue
             i,j          = move
             board[i]     -= 1
-            board[i + j] += 1
+            if player:
+                board[i - j] += 1
+                
+            else:
+                board[i + j] += 1
+        copy_state.action = action
         
         return copy_state
     
-    def actions_Ver2(self, player, diceroll):
+    def actions(self, player, diceroll):
         '''Returns a list of all possible actions from this state'''
         
         
@@ -92,9 +100,10 @@ class State:
         #If a dice roll isn't given
         if diceroll == None:
             for die1 in range(1,7):
-                first_actions = self.moves(die1, boards, player_index)
-                for die2 in range(1,7):
-                    for first_action in first_actions:
+                for first_action in self.moves(die1, boards, player_index):
+                #first_actions = self.moves(die1, boards, player_index)
+                    for die2 in range(1,7):
+                    #for first_action in first_actions:
                         ''' Apply first action to the board(s) '''
                         #print("Before Action:\t{0}".format(boards[player_index]))
                         undo_actions = self.do(first_action, boards, player_index)
@@ -156,11 +165,11 @@ class State:
         #make sure we don't go back last index
         if (player_index == 0):
             index = i + j
-            if index < 1 or index > 25:
+            if index < 1 or index > 24:
                 return undos
         else:
             index = i - j
-            if index < 1 or index > 25:
+            if index < 1 or index > 24:
                 return undos
                 
         boards[player_index][index]  += 1
@@ -185,9 +194,37 @@ class State:
             #Place back onto the old piece index
             boards[board][old]  += 1
     
-    def score(self, player):
-        '''Computes/returns the score for the specified player (r or w)'''
-        pass
+    def score(self, boards, player_index):
+        '''Computes/returns the score for the specified player's board (r or w)'''
+        
+        barConst = 5
+        doorConst = 1
+        
+        enemy_index = int(not player_index)
+        scores = [0,0]
+    
+        '''Increase score if enemy has pieces on bar'''
+        scores[0] += boards[1][0] * barConst
+        scores[1] += boards[0][0] * barConst
+        
+        for index in range(1, 25):
+            '''
+            scores[0] += index * boards[0][index]
+            scores[1] += (25 - index) * boards[1][index]
+            '''
+            
+            '''Increase score if pieces are doored (stacked)'''
+            if boards[0][index] > 1:
+                scores[0] += doorConst
+                
+            if boards[1][index] > 1:
+                scores[1] += doorConst
+                
+                
+        
+        value =  scores[enemy_index] - scores[player_index]
+        
+        return value
     
     def isGameOver(self):
         '''returns true if the state is terminal (game over), else false'''

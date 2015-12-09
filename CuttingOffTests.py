@@ -1,4 +1,5 @@
 from State import State
+from CuttingOff import CuttingOff
 #Start board
 #    0 1 2 3 4 5 6 7 8 910 1 2 3 4 5 6 7 8 920 1 2 3 4
 r = [0,2,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,3,0,5,0,0,0,0,0]
@@ -9,10 +10,13 @@ w = [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2]
 
 s = State(r, w)
 
-a = s.actions(1, [2,2])
+a = s.actions(1, None)
 
+CO = CuttingOff(0, "w", 3)
 
+print("Action from search: " + str(CO.Search(s,[1,6])))
 
+'''
 def printArray(array):
     for i,row in enumerate(array):
         for j,row2 in enumerate(row):
@@ -24,5 +28,4 @@ printArray(a)
 
 
 
-print("current score " + str(s.score([r,w], 1)))
-
+print("current score " + str(s.score(r,[r,w], 0)))'''
