@@ -11,11 +11,11 @@ class Inputs:
 
 ## CREATE ARGUMENT PARSING OBJECT ##
 parser = argparse.ArgumentParser(description="This program executes puzzles ")
-parser.add_argument("-a",metavar="INT", dest="alpha",  nargs=1, default=[193], type=int,help="Specify an alpha value for Alpha-Beta Pruning")
-parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[0],   type=int,help="Specify an beta value for Alpha-Beta Pruning")
-parser.add_argument("-d",metavar="INT", dest="depth",  nargs=1, default=[4],   type=int,help="Specify a cutt-off depth for the AI algorithm")
+parser.add_argument("-a",metavar="INT", dest="alpha",  nargs=1, default=[-1000], type=int,help="Specify an alpha value for Alpha-Beta Pruning")
+parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[1000],   type=int,help="Specify an beta value for Alpha-Beta Pruning")
+parser.add_argument("-d",metavar="INT", dest="depth",  nargs=1, default=[3],   type=int,help="Specify a cutt-off depth for the AI algorithm")
 parser.add_argument("-P", metavar="NAME", dest="pruning",nargs=1, default=["CO"],  type=str, help="Specify a pruning algorithm (CuttingOff, ForwardPruning)")
-
+parser.add_argument("--face-off", dest="faceoff", action='store_true', default=False, help="Execute Memory Usage analysis (TBA for data collection)")
 
 class Driver:
     def __init__(self, Alpha, Beta, Depth, PruningType):
@@ -169,10 +169,43 @@ class Driver:
         return "n"
         
         
+    def faceoff(self):
+        self.player = 0
+        self.enemy  = 1
+        not_game_over = True
+        while not_game_over:
+            if self.state.isGameOver():
+                not_game_over = False
+                break
+            dice            = [random.randint(1,6),random.randint(1,6)]
+            #AI Action
+            print("Red Roll: {0}".format(', '.join([str(x) for x in dice])))
+            dice            = [random.randint(1,6), random.randint(1,6)]
+            action          = self.AI.Search(self.state, self.player, dice)
+            self.state.result(action, self.player)
+            print("Computer has performed the following moves: {0}".format(action))
+            #Print the board for the player to see!
+            writeBoard(self.state.redBoard, self.state.whiteBoard)
+            #input("Press Enter to continue...")
+            if self.state.isGameOver():
+                not_game_over = False
+                break
+            #AI Action
+            print("White Roll: {0}".format(', '.join([str(x) for x in dice])))
+            dice            = [random.randint(1,6), random.randint(1,6)]
+            action          = self.AI.Search(self.state, self.enemy, dice)
+            self.state.result(action, self.enemy)
+            print("Computer has performed the following moves: {0}".format(action))
+            #Print the board for the player to see!
+            writeBoard(self.state.redBoard, self.state.whiteBoard)
+            #input("Press Enter to continue...")
         
-        
-        
-        
+        if self.getWinner() == "w":
+            print("White Wins!!!")
+        elif self.getWinner() == "r":
+            print("Red Wins!!!")
+        else:
+            print("Nobody Wins!!!")
 
 
 if __name__ == '__main__':
@@ -180,6 +213,9 @@ if __name__ == '__main__':
     parser.parse_args(sys.argv[1:], namespace=inputs)
     driver = Driver(inputs.alpha[0],inputs.beta[0],inputs.depth[0],inputs.pruning[0])
     try:
-        driver.start()
+        if inputs.faceoff:
+            driver.faceoff()
+        else:
+            driver.start()
     except KeyboardInterrupt:
         print("Command Ctrl-C: Now Exiting...")

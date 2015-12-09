@@ -18,8 +18,8 @@ class CuttingOff:
         v = self.Max_Value(state, self.alpha, self.beta, 0, diceroll)
         #Need a pick best first move if self.action is still Null...
         if self.action == None:
-            print("Action returned is None...TODO: Handle it")
-        
+            print("Going with alternative action")
+            return self.alt_action
         #Need a way to return the action that results in v
         return self.action
             
@@ -27,7 +27,8 @@ class CuttingOff:
         if self.Cuttoff_Test(state, depth + 1):
             value = state.score(self.player)
             return value
-        v = -193
+        v     = -193
+        v_max = -1000
         if diceroll == None:
             """actionss = state.actions(player, diceroll)
             self.printArray(actionss)"""
@@ -67,6 +68,10 @@ class CuttingOff:
                 if v >= beta:
                     self.action = action
                     return v
+                elif v > v_max:
+                    v_max = v
+                    self.alt_action = action
+                    
                 alpha = max(alpha, v)
             
         return v
