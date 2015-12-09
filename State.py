@@ -115,17 +115,12 @@ class State:
         moves_list   = []
          #bar not empty
         if (self.boards[player][0] >= 1):
+            j = die
+            if player == 1:
+                j = 25 - die
             #if move allowed
-            if player == 0:
-                if (self.boards[enemy][25 - die] <= 1):
-                    moves_list.append((0, 25 - die))
-                
-            elif player == 1:
-                if (self.boards[enemy][die] <= 1):
-                    moves_list.append((0, die))
-            
-            else:
-                print("Error: Invalid player index")
+            if (self.boards[enemy][j] <= 1):
+                moves_list.append((0, j))
         
         elif self.isBearingOff(player):
             if player == 0:

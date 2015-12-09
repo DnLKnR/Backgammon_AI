@@ -116,7 +116,7 @@ def writeBoard(redBoard, whiteBoard):
     print(outString)
     
 
-redBoard = [3,2,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,3,0,5,0,0,0,0,0]
-whiteBoard = [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2]
+#redBoard = [3,2,0,0,0,0,0,0,0,0,0,0,10,0,0,0,0,3,0,5,0,0,0,0,0]
+#whiteBoard = [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2]
 
-writeBoard(redBoard, whiteBoard)
+#writeBoard(redBoard, whiteBoard)
