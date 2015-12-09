@@ -47,11 +47,13 @@ class State:
         enemy  = int(not player)
         for move in action:
             i,j  = move
-            self.boards[player][j]  += 1
+            if j != -1:
+                self.boards[player][j]  += 1
+            
             self.boards[player][i]  -= 1
             undos.append((j,i,player))
             #If enemy player has a piece there, put them on bar
-            if self.boards[enemy][j] == 1:
+            if self.boards[enemy][j] == 1 and j != -1:
                 #Remove from the old piece index
                 self.boards[enemy][j] -= 1
                 #Add to the new piece index, (the bar)
@@ -121,6 +123,33 @@ class State:
             elif player == 1:
                 if (self.boards[enemy][die] <= 1):
                     moves_list.append((0, die))
+            
+            else:
+                print("Error: Invalid player index")
+        
+        elif self.isBearingOff(player):
+            if player == 0:
+                player_name = "Red"
+            else:
+                player_name = "White"
+            print("{0} Player can now Bear off...".format(player_name))
+            
+            
+            if player == 0:
+                i = 25 - die
+                #if red has a piece at that location, they can remove it
+                if self.boards[player][i] > 0:
+                    moves_list.append((i, -1))
+            
+            elif player == 1:
+                i = die
+                if self.boards[player][i] > 0:
+                    moves_list.append((i, -1))
+            
+            else:
+                print("Error: Invalid player index")    
+            
+        
         else:
             for i in range (1, 25):
                 #if white can move from index i with die2
@@ -143,26 +172,34 @@ class State:
         enemy  = int(not player)
         undos = []
         i,j  = move
-                
-        self.boards[player][j]  += 1
-        self.boards[player][i]  -= 1
-        undos.append((j,i,player))
-        #If enemy player has a piece there, put them on bar
-        if self.boards[enemy][j] == 1:
-            #Remove from the old piece index
-            self.boards[enemy][j] -= 1
-            #Add to the new piece index, (the bar)
-            self.boards[enemy][0] += 1
-            #Provide undo tuple, (new index, old index, board index)
-            undos.append((0,j,enemy))
+        #Check if move is not bearing off
+        if j != -1:
+            self.boards[player][j]  += 1
+            self.boards[player][i]  -= 1
+            undos.append((j,i,player))
+            #If enemy player has a piece there, put them on bar
+            if self.boards[enemy][j] == 1:
+                #Remove from the old piece index
+                self.boards[enemy][j] -= 1
+                #Add to the new piece index, (the bar)
+                self.boards[enemy][0] += 1
+                #Provide undo tuple, (new index, old index, board index)
+                undos.append((0,j,enemy))
+        else:
+            #Move is bearing off, piece is thus removed
+            self.boards[player][i]  -= 1
+            undos.append((-1,i,player))
         #return the special formatted actions
         return undos
     
     def undo(self, moves):
         for move in moves:
             i,j,player  = move
-            #Remove from the new piece index
-            self.boards[player][i]  -= 1
+            #Check if the move was bearing off
+            if i != -1:
+                #Remove from the new piece index
+                self.boards[player][i]  -= 1
+                
             #Place back onto the old piece index
             self.boards[player][j]  += 1
     
@@ -197,6 +234,21 @@ class State:
         value =  scores[enemy] - scores[player]
         
         return value
+    
+    def isBearingOff(self, player):
+        if player == 0:
+            for position in self.boards[player][0:18]:
+                if position != 0:
+                    return False
+            
+        elif player == 1:
+            if self.boards[player][0] != 0:
+                return False
+            for position in self.boards[player][7:24]:
+                if position != 0:
+                    return False
+        
+        return True
     
     def isGameOver(self):
         '''returns true if the state is terminal (game over), else false'''

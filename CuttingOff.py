@@ -25,8 +25,8 @@ class CuttingOff:
         v = -193
         enemy  = int(not player)
         if diceroll == None:
-            actionss = state.actions(player, diceroll)
-            self.printArray(actionss)
+            """actionss = state.actions(player, diceroll)
+            self.printArray(actionss)"""
             for actions in state.actions(player, diceroll):
                 
                 total_value = 0
