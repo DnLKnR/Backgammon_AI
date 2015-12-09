@@ -25,7 +25,10 @@ class CuttingOff:
         v = -193
         enemy  = int(not player)
         if diceroll == None:
+            actionss = state.actions(player, diceroll)
+            self.printArray(actionss)
             for actions in state.actions(player, diceroll):
+                
                 total_value = 0
                 #print("All actions: " + str(actions))
                 for die1 in range(len(actions)):
@@ -94,106 +97,10 @@ class CuttingOff:
             return True
         else:
             return False
-    
-    def Utility(self, state, player):
-        '''this function assigns a value to a state, based on the
-        player, which can be passed to this object at the start
-        and checked via self.player'''
-        #player_index = int(not player)
-        return state.score([state.redBoard,state.whiteBoard], player)
-    
-    def Actions(self, state, player, diceroll):
-        '''this function returns a list of all possible
-        actions that can be applied to a state'''
-        return state.actions(player, diceroll)
-    
-    def Result(self, state, action, player):
-        '''This function returns a state with the action
-        applied to it'''
-        return state.result(action, player)
-
-
-class Node:
-    def __init__(self, state, value, actions, parent):
-        self.state   = state
-        self.value   = value
-        self.actions = actions
-        self.parent  = parent
         
-
-
-''' If we are node counting, we might have to convert this search to BFS...
-    it's not the best, but it seems to be the only way...'''
-class MiniMaxBFS:
-    def __init__(self, node_limit):
-        self.node_limit = node_limit
-    
-    def Search(self, state, diceroll, player):
-        self.node_count = 0
-        Min_Queue = []
-        Max_Queue = []
-        value = 0
-        next_actions = state.actions(player, diceroll)
-        for index,action in enumerate(next_actions):
-            new_state = state.result(action, player)
-            actions   = new_state.actions(player, diceroll)
-            value     = value + new_state.score(player)
-            Min_Queue.append(Node(new_state, actions, value, index))
-            self.node_count += 1
-            
-        ply = 0
-        
-        while self.node_count < self.node_limit:
-            while len(Min_Queue) > 0 and self.node_count < self.node_limit:
-                node = Min_Queue.pop(0)
-                for action in node.actions:
-                    new_state = node.state.result(action, player)
-                    actions   = new_state.actions(player, None)
-                    value     = node.value - new_state.score(player)
-                    Min_Queue.append(Node(new_state, actions, value, node.parent))
-                    self.node_count += 1
-                '''Push new actions into Min_Queue'''
-                '''Min_Queue.push(Node(new_state, value, actions))'''
-                pass
-            
-            ply += 1
-            
-            while len(Max_Queue) > 0 and self.node_count < self.node_limit:
-                node = Max_Queue.pop(0)
-                for action in node.actions:
-                    new_state = node.state.result(action, player)
-                    actions   = new_state.actions(player, None)
-                    value     = node.value + new_state.score(player)
-                    Min_Queue.append(Node(new_state, actions, value, node.parent))
-                    self.node_count += 1
-                '''Push new actions into Min_Queue'''
-                '''Min_Queue.push(Node(new_state, value, actions))'''
-                
-                pass
-            
-        action_index = self.computeBestState(Max_Queue + Min_Queue, next_actions)
-        
-        
-                
-        #sorted(Max_Queue, key=lambda x: x.value)
-    def computeBestState(self, queue, actions):
-        sorted(queue, key=lambda x: x.parent)
-        next_values = []
-        count = 0
-        length = len(queue)
-        for i in range(len(actions)):
-            value = 0
-            for j in range(count,length):
-                if queue[j].parent != i:
-                    next_values.append(value/(j - count))
-                else:
-                    count += 1
-                    value += queue[j].value
-        maxv = -100000000
-        action_index = 0
-        for i in range(len(actions)):
-            if maxv < value[i]:
-                maxv = value[i]
-                action_index = i
-        
-        return action_index
+    def printArray(self, array):
+        for i,row in enumerate(array):
+            for j,row2 in enumerate(row):
+                print("------------- Dice Roll {0},{1} or {1},{0} -------------".format(i + 1,j + 1))
+                for index,actionset in enumerate(row2):
+                    print("Option {0}:\t{1}".format(index + 1,actionset))
