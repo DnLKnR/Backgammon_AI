@@ -197,9 +197,10 @@ class State:
     def score(self, player):
         '''Computes/returns the score for the specified player's board (r or w)'''
         
-        barConst = 5
-        doorConst = 1
+        barConst = 100
+        doorConst = 50
         bearConst = 10
+        moveForwardConst = 1
         
         enemy = int(not player)
         scores = [0,0]
@@ -209,10 +210,9 @@ class State:
         scores[1] += self.boards[0][0] * barConst
         
         for index in range(1, 25):
-            '''
-            scores[0] += index * boards[0][index]
-            scores[1] += (25 - index) * boards[1][index]
-            '''
+            
+            self.boards[0] += index * self.boards[0]
+            self.boards[1] += index * self.boards[1]
             
             '''Increase score if pieces are doored (stacked)'''
             if self.boards[0][index] > 1:
