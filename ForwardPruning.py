@@ -141,7 +141,7 @@ class RandomForwardPruning:
                             skip_indexes.append((i,j,k))
                             moves -= 1
             
-       return skip_indexes
+        return skip_indexes
     
     def Count_Actions(self, actions):
         '''This function returns the number of actions

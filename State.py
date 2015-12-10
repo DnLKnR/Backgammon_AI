@@ -142,14 +142,10 @@ class State:
                 if player == 0:
                     if (self.boards[player][i] > 0 and i + die < 25 and self.boards[enemy][i + die] < 2):
                         j = i + die
-                        if j > 24:
-                            continue
                         moves_list.append((i, j))
                 if player == 1:
                     if (self.boards[player][i] > 0 and i - die > 0 and self.boards[enemy][i - die] < 2):
                         j = i - die
-                        if j < 1:
-                            continue
                         moves_list.append((i, j))
         return moves_list
     
@@ -158,6 +154,8 @@ class State:
         enemy  = int(not player)
         undos = []
         i,j  = move
+        if self.boards[enemy][j] > 1:
+            return undos
         #Check if move is not bearing off
         if j != -1:
             self.boards[player][j]  += 1
