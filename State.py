@@ -1,6 +1,20 @@
 '''This class holds a state of the backgammon board as well
 as operations that can be performed on the state'''
 
+'''
+Each index contains all possible actions for that dice roll.
+Roll a 5 and a 3, then actions will be at ...[2][4]
+
+rolls =    [
+            [[1,1 or 1,1]],
+            [[1,2 or 2,1],[2,2 or 2,2]],
+            [[1,3 or 3,1],[2,3 or 3,2],[3,3 or 3,3]],
+            [[1,4 or 4,1],[2,4 or 4,2],[3,4 or 4,3],[4,4 or 4,4]],
+            [[1,5 or 5,1],[2,5 or 5,2],[3,5 or 5,3],[4,5 or 5,4],[5,5 or 5,5]],
+            [[1,6 or 6,1],[2,6 or 6,2],[3,6 or 6,3],[4,6 or 6,4],[5,6 or 6,5],[6,6 or 6,6]]
+           ]
+
+'''
 
 class State:
     def __init__(self, redBoard, whiteBoard):
@@ -9,22 +23,6 @@ class State:
         self.boards = [self.redBoard, self.whiteBoard]
         #The last action performed on the state
         self.action     = None
-
-    
-    '''
-    Each index contains all possible actions for that dice roll.
-    Roll a 5 and a 3, then actions will be at ...[2][4]
-
-    rolls =    [
-                [[1,1 or 1,1]],
-                [[1,2 or 2,1],[2,2 or 2,2]],
-                [[1,3 or 3,1],[2,3 or 3,2],[3,3 or 3,3]],
-                [[1,4 or 4,1],[2,4 or 4,2],[3,4 or 4,3],[4,4 or 4,4]],
-                [[1,5 or 5,1],[2,5 or 5,2],[3,5 or 5,3],[4,5 or 5,4],[5,5 or 5,5]],
-                [[1,6 or 6,1],[2,6 or 6,2],[3,6 or 6,3],[4,6 or 6,4],[5,6 or 6,5],[6,6 or 6,6]]
-               ]
-
-    '''
 
     def get(self, player):
         return self.boards[player]
@@ -123,13 +121,6 @@ class State:
                 moves_list.append((0, j))
         
         elif self.isBearingOff(player):
-            if player == 0:
-                player_name = "Red"
-            else:
-                player_name = "White"
-            print("{0} Player can now Bear off...".format(player_name))
-            
-            
             if player == 0:
                 i = 25 - die
                 #if red has a piece at that location, they can remove it

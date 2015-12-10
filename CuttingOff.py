@@ -1,6 +1,9 @@
-'''Note: These will have to be modified for
-node counting instead.  We can have cutting
-off search do node counting instead of depth'''
+'''The CuttingOff class acts as a wrapper for the
+CuttingOff Search algorithm implemented.  The CuttingOff Search
+algorithm is constructed from the Alpha-Beta Search algorithm with
+a special modification.  This modificaiton is that it chooses a depth
+at which to stop searching in the tree.  The purpose of this is to
+speed up evaluation time.'''
 
 class CuttingOff:
     def __init__(self, alpha, beta, max_depth):
@@ -10,6 +13,9 @@ class CuttingOff:
         self.count  = 0
         
     def Search(self, state, player, diceroll):
+        '''This function serves as the entry point for the Min-Max value
+        recursion search.  This function instantiates/resets values that
+        will be used throughout the recursion'''
         #Set attributes to store player index and enemy index for boards
         self.player = player
         self.enemy  = int(not player)
@@ -21,6 +27,8 @@ class CuttingOff:
         return self.action
             
     def Max_Value(self, state, alpha, beta, depth, diceroll):
+        '''This function finds the action that leads to the overall
+        best actions sets for the player'''
         self.count += 1
         if self.Cuttoff_Test(state, depth + 1):
             value = state.score(self.player)
@@ -30,7 +38,6 @@ class CuttingOff:
         if diceroll == None:
             for actions in state.actions(self.player, diceroll):
                 total_value = 0
-                #print("All actions: " + str(actions))
                 for die1 in range(len(actions)):
                     for die2 in range(len(actions[die1])):
                         if len(actions[die1][die2]) == 0:
@@ -73,6 +80,8 @@ class CuttingOff:
         return v
     
     def Min_Value(self, state, alpha, beta, depth):
+        '''This function attempts to find the enemy's moves
+        by minimizing the player's score.'''
         self.count += 1
         if self.Cuttoff_Test(state, depth + 1):
             #Always produce score based off AI side
@@ -115,6 +124,7 @@ class CuttingOff:
             return False
         
     def printArray(self, array):
+        '''Special actions array print function for debugging purposes'''
         for i,row in enumerate(array):
             for j,row2 in enumerate(row):
                 print("------------- Dice Roll {0},{1} or {1},{0} -------------".format(i + 1,j + 1))

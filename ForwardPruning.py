@@ -1,7 +1,10 @@
-'''Note: These will have to be modified for
-node counting instead.  We can have cutting
-off search do node counting instead of depth'''
+'''The RandomForwardPruning class acts as a wrapper for the
+ForwardPruning algorithm implemented.  The random forward pruning
+algorithms is constructed from the CuttingOff Search algorithm with
+a special modification.  This modificaiton is that it chooses a ratio'd
+amount of indexes to skip.  These indexes are selected at random'''
 import sys, random
+
 class RandomForwardPruning:
     def __init__(self, alpha, beta, max_depth, ratio):
         self.alpha        = alpha
@@ -11,6 +14,9 @@ class RandomForwardPruning:
         self.count        = 0
         
     def Search(self, state, player, diceroll):
+        '''This function serves as the entry point for the Min-Max value
+        recursion search.  This function instantiates/resets values that
+        will be used throughout the recursion'''
         #Set attributes to store player index and enemy index for boards
         self.player = player
         self.enemy  = int(not player)
@@ -22,6 +28,8 @@ class RandomForwardPruning:
         return self.action
             
     def Max_Value(self, state, alpha, beta, depth, diceroll):
+        '''This function finds the action that leads to the overall
+        best actions sets for the player'''
         self.count += 1
         if self.Cuttoff_Test(state, depth + 1):
             value = state.score(self.player)
@@ -33,17 +41,13 @@ class RandomForwardPruning:
             skip_index = self.Random_Remove(actions)
             for i,action in enumerate(actions): 
                 total_value = 0
-                #print("All actions: " + str(actions))
-                #print("len(action): {0}".format(len(action)))
                 for die1 in range(len(action)):
-                #print("len(action[die1]): {0}".format(len(action[die1])))
                     for die2 in range(len(action[die1])):
                         #Don't try to evaluate null indexes
                         if len(action[die1][die2]) == 0:
                             continue
                         #If the index is a skip_index, don't evaluate it
                         elif (i,die1,die2) in skip_index:
-                            #print("Skipping index set in Max: {0}".format((i,die1,die2)))
                             continue
                         undo_actions = state.result(action[die1][die2], self.player)
                         value = self.Min_Value(state, alpha, beta, depth + 1)
@@ -52,10 +56,8 @@ class RandomForwardPruning:
                         if die1 == die2:
                             probability = 1/36
                         total_value += probability * value
-                #Increment the node count by 1 since this action is being evaluated
-                #self.node_count += 1
+                
                 v = max(v, total_value)
-                #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
                 if v >= beta:
                     return v
                 alpha = max(alpha, v)
@@ -65,10 +67,9 @@ class RandomForwardPruning:
                 undo_actions = state.result(action, self.player)
                 total_value = self.Min_Value(state, alpha, beta, depth + 1)
                 state.undo(undo_actions)
-                print("For Action = {0}, V is: {1}".format(action, total_value))
+                #print("For Action = {0}, V is: {1}".format(action, total_value))
                 v = max(v, total_value)
                 
-                #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])
                 if v >= beta:
                     self.action = action
                     return v
@@ -81,6 +82,8 @@ class RandomForwardPruning:
         return v
     
     def Min_Value(self, state, alpha, beta, depth):
+        '''This function attempts to find the enemy's moves
+        by minimizing the player's score.'''
         self.count += 1
         if self.Cuttoff_Test(state, depth + 1):
             #Always produce score based off AI side
@@ -119,10 +122,13 @@ class RandomForwardPruning:
         return v
     
     def Random_Remove(self, actions):
+        '''This function returns a list of random skip indices to be
+        skipped in the actions.  The purpose of this function is to 
+        trim down the search tree even further.'''
         count = self.Count_Actions(actions)
         moves = (count * self.ratio)//1
         skip_indexes = []
-        #print("Before Random Remove: {0}".format(count))
+        #Store a random set of skip indices to help prune the search tree
         while moves > 0:
             for i in range(len(actions)):
                 for j in range(len(actions[i])):
@@ -135,12 +141,11 @@ class RandomForwardPruning:
                             skip_indexes.append((i,j,k))
                             moves -= 1
             
-                #print(actions[index][die1].pop(die2))
-        #count = self.Count_Actions(actions)
-        #print("After Random Remove: {0}".format(count))
-        return skip_indexes
+       return skip_indexes
     
     def Count_Actions(self, actions):
+        '''This function returns the number of actions
+        that are in the actions multidimensional array.'''
         counter = 0
         for i in range(len(actions)):
             for j in range(len(actions[i])):
@@ -163,6 +168,7 @@ class RandomForwardPruning:
             return False
         
     def printArray(self, array):
+        '''Special actions array print function for debugging purposes'''
         for i,row in enumerate(array):
             for j,row2 in enumerate(row):
                 print("------------- Dice Roll {0},{1} or {1},{0} -------------".format(i + 1,j + 1))
