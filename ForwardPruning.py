@@ -1,7 +1,7 @@
 '''Note: These will have to be modified for
 node counting instead.  We can have cutting
 off search do node counting instead of depth'''
-import sys
+import sys, random
 class RandomForwardPruning:
     def __init__(self, alpha, beta, max_depth, ratio):
         self.alpha        = alpha
@@ -74,7 +74,7 @@ class RandomForwardPruning:
             #Always produce score based off AI side
             value = state.score(self.player)
             return value
-        v     = 10000
+        v     = 100000
         #Produce the enemy's actions and remove a ratio of them
         for actions in self.Random_Remove(state.actions(self.enemy, None)):
             total_value = 0
@@ -88,7 +88,7 @@ class RandomForwardPruning:
                     if die1 == die2:
                         probability = 1/36
                     total_value += probability * value
-                    
+            total_value *= (1/self.ratio)        
             v = min(v, total_value)
             
             if v <= alpha:
@@ -97,23 +97,31 @@ class RandomForwardPruning:
         return v
     
     def Random_Remove(self, actions):
-        counter = 0
-        for i in range(actions):
-            for j in range(actions[i]):
-                for k in range(actions[i][j]):
-                    counter += 1
-        moves = (counter * self.ratio)//1
-        print("Before Random Remove: {0}".format(actions))
+        count = self.Count_Actions(actions)
+        moves = (count * self.ratio)//1
+        #print("Before Random Remove: {0}".format(count))
         while moves > 0:
-            index = random.randint(0,len(actions) - 1)
-            die1 = random.randint(0,len(actions[index]) - 1)
-            die2 = random.randint(0,len(actions[index][die1]) - 1)
-            actions[index][die1].pop(die2)
-            moves -= 1
-        print("After Random Remove: {0}".format(actions))
-        sys.exit(1)
+            try:
+                index = random.randint(0,len(actions) - 1)
+                die1 = random.randint(0,len(actions[index]) - 1)
+                die2 = random.randint(0,len(actions[index][die1]) - 1)
+                actions[index][die1].pop(die2)
+                moves -= 1
+            except:
+                #Random function error (due to invalid range)
+                moves -= 1
+                continue
+        #count = self.Count_Actions(actions)
+        #print("After Random Remove: {0}".format(count))
         return actions
-            
+    
+    def Count_Actions(self, actions):
+        counter = 0
+        for i in range(len(actions)):
+            for j in range(len(actions[i])):
+                for k in range(len(actions[i][j])):
+                    counter += 1
+        return counter  
     
     def Cuttoff_Test(self, state, depth):
         '''returns true for all nodes greater than some fixed nodes limit

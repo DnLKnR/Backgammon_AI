@@ -235,7 +235,7 @@ class Driver:
 if __name__ == '__main__':
     inputs = Inputs()
     parser.parse_args(sys.argv[1:], namespace=inputs)
-    driver = Driver(inputs.alpha[0],inputs.beta[0],inputs.ratio[0],inputs.depth[0],inputs.pruning[0],inputs.ff,inputs.cc)
+    driver = Driver(inputs.alpha[0],inputs.beta[0],inputs.depth[0],inputs.ratio[0],inputs.pruning[0],inputs.ff,inputs.cc)
     try:
         if inputs.faceoff or inputs.ff or inputs.cc:
             driver.faceoff()
