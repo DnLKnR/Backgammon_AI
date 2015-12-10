@@ -27,14 +27,15 @@ class RandomForwardPruning:
         v     = -100000
         v_max = -100000
         if diceroll == None:
-            for actions in self.Random_Remove(state.actions(self.player, diceroll)):
+            actions = self.Random_Remove(state.actions(self.player, diceroll))
+            for action in actions:
                 total_value = 0
                 #print("All actions: " + str(actions))
-                for die1 in range(len(actions)):
-                    for die2 in range(len(actions[die1])):
+                for die1 in range(len(action)):
+                    for die2 in range(len(action[die1])):
                         if len(actions[die1][die2]) == 0:
                             continue
-                        undo_actions = state.result(actions[die1][die2], self.player)
+                        undo_actions = state.result(action[die1][die2], self.player)
                         value = self.Min_Value(state, alpha, beta, depth + 1)
                         state.undo(undo_actions)
                         probability = 1/18
@@ -76,12 +77,13 @@ class RandomForwardPruning:
             return value
         v     = 100000
         #Produce the enemy's actions and remove a ratio of them
-        for actions in self.Random_Remove(state.actions(self.enemy, None)):
+        actions = self.Random_Remove(state.actions(self.enemy, None))
+        for action in actions:
             total_value = 0
             #loop through possible die rolls
-            for die1 in range(len(actions)):
-                for die2 in range(len(actions[die1])):
-                    undo_actions = state.result(actions[die1][die2], self.enemy)
+            for die1 in range(len(action)):
+                for die2 in range(len(action[die1])):
+                    undo_actions = state.result(action[die1][die2], self.enemy)
                     value        = self.Max_Value(state, alpha, beta, depth + 1, None)
                     state.undo(undo_actions)
                     probability = 1/18
@@ -105,8 +107,9 @@ class RandomForwardPruning:
                 index = random.randint(0,len(actions) - 1)
                 die1 = random.randint(0,len(actions[index]) - 1)
                 die2 = random.randint(0,len(actions[index][die1]) - 1)
-                actions[index][die1].pop(die2)
+                actions[index][die1].remove(actions[index][die1][die2])
                 moves -= 1
+                #print(actions[index][die1].pop(die2))
             except:
                 #Random function error (due to invalid range)
                 moves -= 1
