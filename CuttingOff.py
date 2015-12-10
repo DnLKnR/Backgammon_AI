@@ -7,6 +7,7 @@ class CuttingOff:
         self.alpha   = alpha
         self.beta    = beta
         self.max_depth = max_depth
+        self.count  = 0
         
     def Search(self, state, player, diceroll):
         #Set attributes to store player index and enemy index for boards
@@ -20,6 +21,7 @@ class CuttingOff:
         return self.action
             
     def Max_Value(self, state, alpha, beta, depth, diceroll):
+        self.count += 1
         if self.Cuttoff_Test(state, depth + 1):
             value = state.score(self.player)
             return value
@@ -33,8 +35,10 @@ class CuttingOff:
                     for die2 in range(len(actions[die1])):
                         if len(actions[die1][die2]) == 0:
                             continue
+                        #Perform actions and get the resulting UNDO actions
                         undo_actions = state.result(actions[die1][die2], self.player)
                         value = self.Min_Value(state, alpha, beta, depth + 1)
+                        #Use the undo actions to restore the state
                         state.undo(undo_actions)
                         probability = 1/18
                         if die1 == die2:
@@ -69,6 +73,7 @@ class CuttingOff:
         return v
     
     def Min_Value(self, state, alpha, beta, depth):
+        self.count += 1
         if self.Cuttoff_Test(state, depth + 1):
             #Always produce score based off AI side
             value = state.score(self.player)
@@ -79,8 +84,10 @@ class CuttingOff:
             total_value = 0
             for die1 in range(len(actions)):
                 for die2 in range(len(actions[die1])):
+                    #Perform actions and get the resulting UNDO actions
                     undo_actions = state.result(actions[die1][die2], self.enemy)
                     value        = self.Max_Value(state, alpha, beta, depth + 1, None)
+                    #Use the undo actions to restore the state
                     state.undo(undo_actions)
                     probability = 1/18
                     if die1 == die2:

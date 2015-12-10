@@ -8,6 +8,7 @@ class RandomForwardPruning:
         self.beta         = beta
         self.max_depth    = max_depth
         self.ratio        = ratio
+        self.count        = 0
         
     def Search(self, state, player, diceroll):
         #Set attributes to store player index and enemy index for boards
@@ -21,6 +22,7 @@ class RandomForwardPruning:
         return self.action
             
     def Max_Value(self, state, alpha, beta, depth, diceroll):
+        self.count += 1
         if self.Cuttoff_Test(state, depth + 1):
             value = state.score(self.player)
             return value
@@ -28,13 +30,20 @@ class RandomForwardPruning:
         v_max = -100000
         if diceroll == None:
             actions = state.actions(self.player, diceroll)
-            for action in self.Random_Remove(actions):
+            skip_index = self.Random_Remove(actions)
+            for i,action in enumerate(actions): 
                 total_value = 0
                 #print("All actions: " + str(actions))
+                #print("len(action): {0}".format(len(action)))
                 for die1 in range(len(action)):
+                #print("len(action[die1]): {0}".format(len(action[die1])))
                     for die2 in range(len(action[die1])):
-                        print("test")
+                        #Don't try to evaluate null indexes
                         if len(action[die1][die2]) == 0:
+                            continue
+                        #If the index is a skip_index, don't evaluate it
+                        elif (i,die1,die2) in skip_index:
+                            #print("Skipping index set in Max: {0}".format((i,die1,die2)))
                             continue
                         undo_actions = state.result(action[die1][die2], self.player)
                         value = self.Min_Value(state, alpha, beta, depth + 1)
@@ -72,6 +81,7 @@ class RandomForwardPruning:
         return v
     
     def Min_Value(self, state, alpha, beta, depth):
+        self.count += 1
         if self.Cuttoff_Test(state, depth + 1):
             #Always produce score based off AI side
             value = state.score(self.player)
@@ -79,13 +89,22 @@ class RandomForwardPruning:
         v     = 100000
         #Produce the enemy's actions and remove a ratio of them
         actions = state.actions(self.enemy, None)
-        for action in self.Random_Remove(actions):
+        skip_index = self.Random_Remove(actions)
+        for i,action in enumerate(actions):
             total_value = 0
             #loop through possible die rolls
             for die1 in range(len(action)):
                 for die2 in range(len(action[die1])):
+                    #Don't try to evaluate null indexes
+                    if len(action[die1][die2]) == 0:
+                        continue
+                    #If the index is a skip_index, don't evaluate it
+                    elif (i,die1,die2) in skip_index:
+                        continue
+                    #Perform actions and get the resulting UNDO actions
                     undo_actions = state.result(action[die1][die2], self.enemy)
                     value        = self.Max_Value(state, alpha, beta, depth + 1, None)
+                    #Use the undo actions to restore the state
                     state.undo(undo_actions)
                     probability = 1/18
                     if die1 == die2:
@@ -102,22 +121,24 @@ class RandomForwardPruning:
     def Random_Remove(self, actions):
         count = self.Count_Actions(actions)
         moves = (count * self.ratio)//1
+        skip_indexes = []
         #print("Before Random Remove: {0}".format(count))
         while moves > 0:
-            try:
-                index = random.randint(0,len(actions) - 1)
-                die1 = random.randint(0,len(actions[index]) - 1)
-                die2 = random.randint(0,len(actions[index][die1]) - 1)
-                del actions[index][die1][die2]
-                moves -= 1
+            for i in range(len(actions)):
+                for j in range(len(actions[i])):
+                    for k in range(len(actions[i][j])):
+                        if moves == 0:
+                            return skip_indexes
+                        elif (i,j,k) in skip_indexes:
+                            continue
+                        elif not random.random()//self.ratio:
+                            skip_indexes.append((i,j,k))
+                            moves -= 1
+            
                 #print(actions[index][die1].pop(die2))
-            except:
-                #Random function error (due to invalid range)
-                moves -= 1
-                continue
         #count = self.Count_Actions(actions)
         #print("After Random Remove: {0}".format(count))
-        return actions
+        return skip_indexes
     
     def Count_Actions(self, actions):
         counter = 0
@@ -125,6 +146,7 @@ class RandomForwardPruning:
             for j in range(len(actions[i])):
                 for k in range(len(actions[i][j])):
                     counter += 1
+        
         return counter  
     
     def Cuttoff_Test(self, state, depth):
