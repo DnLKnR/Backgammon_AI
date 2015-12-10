@@ -13,19 +13,21 @@ class Inputs:
 parser = argparse.ArgumentParser(description="This program executes puzzles ")
 parser.add_argument("-a",metavar="INT", dest="alpha",  nargs=1, default=[-1000], type=int,help="Specify an alpha value for Alpha-Beta Pruning")
 parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[1000],   type=int,help="Specify an beta value for Alpha-Beta Pruning")
+parser.add_argument("-B",metavar="INT", dest="best",   nargs=1, default=[3],   type=int,help="Specify an best-N count value for Forward Pruning")
 parser.add_argument("-d",metavar="INT", dest="depth",  nargs=1, default=[3],   type=int,help="Specify a cutt-off depth for the AI algorithm")
 parser.add_argument("-P", metavar="NAME", dest="pruning",nargs=1, default=["CO"],  type=str, help="Specify a pruning algorithm (CuttingOff, ForwardPruning)")
 parser.add_argument("--face-off", dest="faceoff", action='store_true', default=False, help="Execute Memory Usage analysis (TBA for data collection)")
 
 class Driver:
-    def __init__(self, Alpha, Beta, Depth, PruningType):
+    def __init__(self, Alpha, Beta, Best, Depth, PruningType):
         self.Alpha = Alpha
         self.Beta  = Beta 
         self.Depth = Depth
+        self.Best  = Best
         if PruningType.lower() in ["co","cuttingoff"]:
             self.AI = CuttingOff(self.Alpha, self.Beta, self.Depth)
         elif PruningType.lower() in ["fc","forwardpruning"]:
-            self.AI = ForwardPruning(self.Alpha, self.Beta, self.Depth)
+            self.AI = ForwardPruning(self.Alpha, self.Beta, self.Best)
         else:
             Print("Error: {0} is not a valid Pruning Type".format(PruningType))
             sys.exit(1)
@@ -211,7 +213,7 @@ class Driver:
 if __name__ == '__main__':
     inputs = Inputs()
     parser.parse_args(sys.argv[1:], namespace=inputs)
-    driver = Driver(inputs.alpha[0],inputs.beta[0],inputs.depth[0],inputs.pruning[0])
+    driver = Driver(inputs.alpha[0],inputs.beta[0],inputs.best[0],inputs.depth[0],inputs.pruning[0])
     try:
         if inputs.faceoff:
             driver.faceoff()

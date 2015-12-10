@@ -37,12 +37,12 @@ class CuttingOff:
                         if len(actions[die1][die2]) == 0:
                             continue
                         undo_actions = state.result(actions[die1][die2], self.player)
-                        temp = self.Min_Value(state, alpha, beta, depth + 1)
+                        value = self.Min_Value(state, alpha, beta, depth + 1)
                         state.undo(undo_actions)
                         probability = 1/18
                         if die1 == die2:
                             probability = 1/36
-                        total_value += probability * temp
+                        total_value += probability * value
                 #Increment the node count by 1 since this action is being evaluated
                 #self.node_count += 1
                 v = max(v, total_value)
@@ -85,7 +85,10 @@ class CuttingOff:
                     undo_actions = state.result(actions[die1][die2], self.enemy)
                     value        = self.Max_Value(state, alpha, beta, depth + 1, None)
                     state.undo(undo_actions)
-                    total_value += (1/18) * value
+                    probability = 1/18
+                    if die1 == die2:
+                        probability = 1/36
+                    total_value += probability * value
                     
             v = min(v, total_value)
             
