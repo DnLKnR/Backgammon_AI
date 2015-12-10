@@ -149,7 +149,7 @@ class State:
             for i in range (1, 25):
                 #if white can move from index i with die2
                 if player == 0:
-                    if (self.boards[player][i] > 0 and i + die < 24 and self.boards[enemy][i + die] < 2):
+                    if (self.boards[player][i] > 0 and i + die < 25 and self.boards[enemy][i + die] < 2):
                         j = i + die
                         if j > 24:
                             continue
@@ -197,37 +197,31 @@ class State:
     def score(self, player):
         '''Computes/returns the score for the specified player's board (r or w)'''
         
-        barConst = 250
-        doorConst = 50
+        barConst = 1000
         singletonConst = 25
-        bearConst = 10
+        bearConst = 1000
         moveForwardConst = 1
         
         enemy = int(not player)
         scores = [0,0]
     
         '''Increase score if enemy has pieces on bar'''
-        scores[0] += self.boards[1][0] * barConst
-        scores[1] += self.boards[0][0] * barConst
+        scores[0] -= self.boards[0][0] * barConst
+        scores[1] -= self.boards[1][0] * barConst
         
         for index in range(1, 25):
             '''
             scores[0] += index * self.boards[0][index]
             scores[1] += index * self.boards[1][index]
             '''
-            '''Increase score if pieces are doored (stacked)'''
-            if self.boards[0][index] > 1:
-                scores[0] += doorConst / self.boards[0][index]
-                
-            if self.boards[1][index] > 1:
-                scores[1] += doorConst / self.boards[1][index]
-                
+            '''Decrease score if pieces aren't doored (stacked)'''
             if self.boards[0][index] == 1:
                 scores[0] -= singletonConst
                 
             if self.boards[1][index] == 1:
                 scores[1] -= singletonConst
                 
+        '''increase score if in the end game'''
         if self.isBearingOff(0):
             scores[0] += bearConst
         if self.isBearingOff(1):
