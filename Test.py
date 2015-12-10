@@ -1,5 +1,7 @@
-import argparse, sys, time
-from django.utils.dateparse import time_re
+import argparse, sys, time, random
+from CuttingOff import CuttingOff
+from ForwardPruning import RandomForwardPruning
+from State import State
 
 
 ## CLASS FOR STORING COMMAND LINE ARGUMENTS ##
@@ -15,10 +17,18 @@ parser.add_argument("-mu",         dest="mu",     action='store_true', default=F
 parser.add_argument("-vs",         dest="vs",     action='store_true', default=False, help="Execute Forward Pruning Versus Cuttoff Search Analysis (Wins/Loss)")
 parser.add_argument("-ff",         dest="ff",     action='store_true', default=False, help="Execute Forward Pruning Versus Itself Analysis (Wins/Loss)")
 parser.add_argument("-cc",         dest="cc",     action='store_true', default=False, help="Execute Cuttoff Search Versus Itself Versus  Analysis (Wins/Loss)")
+parser.add_argument("-a",metavar="INT", dest="alpha",  nargs=1, default=[-100000], type=int,help="Specify an alpha value for Alpha-Beta Pruning")
+parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[100000],   type=int,help="Specify an beta value for Alpha-Beta Pruning")
+parser.add_argument("-R",metavar="FLOAT", dest="ratio",   nargs=1, default=[0.5],   type=int,help="Specify an Remove ratio for Random Forward Pruning")
+parser.add_argument("-d",metavar="INT", dest="depth",  nargs=1, default=[3],   type=int,help="Specify a cutt-off depth for the AI algorithm")
 
 class Mem_Usage:
-    def __init__(self,runs,FF,CC):
+    def __init__(self,alpha,beta,depth,ratio,runs,FF,CC):
         self.runs = runs
+        self.Alpha = alpha
+        self.Beta  = beta
+        self.Depth = depth
+        self.Ratio = ratio
         self.names = []
         if CC:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
@@ -32,6 +42,12 @@ class Mem_Usage:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
             self.AI2 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
             self.names = ["CuttingOff","ForwardPruning"]
+        self.__construct__()
+            
+    def __construct__(self):
+        w =  [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2] 
+        r =  [0,2,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,3,0,5,0,0,0,0,0]
+        self.state = State(r,w)
         
     def get_analysis(self):
         '''This function generates the analysis for the memory usage in terms
@@ -92,7 +108,7 @@ class Mem_Usage:
                 print("The Computer has no valid moves, passing turn...")
             #Print the board for the player to see!
             writeBoard(self.state.redBoard, self.state.whiteBoard)
-            #input("Press Enter to continue...")
+            #input("Press Enter to continue...")
             if self.state.isGameOver():
                 not_game_over = False
                 break
@@ -119,7 +135,7 @@ class Mem_Usage:
     def getWinner(self):
         winner = 1
         for i in range(24):
-            if(self.redBoard[i] != 0):
+            if(self.state.redBoard[i] != 0):
                 winner = 0
                 break
 
@@ -128,7 +144,7 @@ class Mem_Usage:
             
         winner = 2
         for i in range(24):
-            if(self.whiteBoard[i] != 0):
+            if(self.state.whiteBoard[i] != 0):
                 winner = 0
                 break
 
@@ -138,8 +154,12 @@ class Mem_Usage:
         return "n"
     
 class Versus:
-    def __init__(self,runs,FF,CC):
+    def __init__(self,alpha,beta,depth,ratio,runs,FF,CC):
         self.runs = runs
+        self.Alpha = alpha
+        self.Beta  = beta
+        self.Depth = depth
+        self.Ratio = ratio
         self.names = []
         if CC:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
@@ -153,13 +173,20 @@ class Versus:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
             self.AI2 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
             self.names = ["CuttingOff","ForwardPruning"]
+    
+        self.__construct__()
+            
+    def __construct__(self):
+        w =  [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2] 
+        r =  [0,2,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,3,0,5,0,0,0,0,0]
+        self.state = State(r,w)
         
     def get_analysis(self):
         r = 0
         w = 0
         runs = self.runs
         while runs > 0:
-            winner = self.faceoff(self)
+            winner = self.faceoff()
             if winner == "r":
                 r += 1
             elif winner == "w":
@@ -205,7 +232,7 @@ class Versus:
     def getWinner(self):
         winner = 1
         for i in range(24):
-            if(self.redBoard[i] != 0):
+            if(self.state.redBoard[i] != 0):
                 winner = 0
                 break
 
@@ -214,7 +241,7 @@ class Versus:
             
         winner = 2
         for i in range(24):
-            if(self.whiteBoard[i] != 0):
+            if(self.state.whiteBoard[i] != 0):
                 winner = 0
                 break
 
@@ -224,8 +251,12 @@ class Versus:
         return "n"
     
 class Run_Time:
-        def __init__(self,runs,FF,CC):
+    def __init__(self,alpha,beta,depth,ratio,runs,FF,CC):
         self.runs = runs
+        self.Alpha = alpha
+        self.Beta  = beta
+        self.Depth = depth
+        self.Ratio = ratio
         self.names = []
         if CC:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
@@ -239,13 +270,19 @@ class Run_Time:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
             self.AI2 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
             self.names = ["CuttingOff","ForwardPruning"]
+        self.__construct__()
+            
+    def __construct__(self):
+        w =  [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2] 
+        r =  [0,2,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,3,0,5,0,0,0,0,0]
+        self.state = State(r,w)
         
     def get_analysis(self):
         r = 0
         w = 0
         runs = self.runs
         while runs > 0:
-            winner = self.faceoff(self)
+            winner = self.faceoff()
             if winner == "r":
                 r += 1
             elif winner == "w":
@@ -269,9 +306,9 @@ class Run_Time:
                 break
             #AI1 Action
             dice            = [random.randint(1,6), random.randint(1,6)]
-            start = time.timeNow()
+            start = time.time()
             action          = self.AI1.Search(self.state, self.player, dice)
-            end   = time.timeNow()
+            end   = time.time()
             moves_r += 1
             times_r  += (end - start)
             if action != None:
@@ -282,9 +319,9 @@ class Run_Time:
                 break
             #AI2 Action
             dice            = [random.randint(1,6), random.randint(1,6)]
-            start = time.timeNow()
+            start = time.time()
             action          = self.AI2.Search(self.state, self.enemy, dice)
-            end   = time.timeNow()
+            end   = time.time()
             moves_w += 1
             times_w  += (end - start)
             if action != None:
@@ -299,7 +336,7 @@ class Run_Time:
         times = [0,0]
         runs = self.runs
         while runs > 0:
-            moves_r,moves_w,total_r,total_w = self.faceoff(self)
+            moves_r,moves_w,total_r,total_w = self.faceoff()
             moves[0] += moves_r
             moves[1] += moves_w
             times[0] += total_r
@@ -330,9 +367,13 @@ if __name__ == '__main__':
     CC      = inputs.cc
     COUNT   = inputs.runs[0]
     LOGFILE = inputs.file[0]
-    RUN_SP  = inputs.sp
+    RUN_SP  = inputs.vs
     RUN_RT  = inputs.rt
     RUN_MU  = inputs.mu
+    ALPHA   = inputs.alpha[0]
+    BETA    = inputs.beta[0]
+    DEPTH   = inputs.depth[0]
+    RATIO   = inputs.ratio[0]
     ## CHECK VALIDITY OF COMMAND LINE ARGS ##
     invalid = 0
     if COUNT < 1 and (RUN_ALL or RUN_RT):
@@ -354,14 +395,14 @@ if __name__ == '__main__':
     #IF NO TEST SPECIFIED OR RUNTIME SPECIFIED, EXECUTE RUNTIME
     if RUN_RT or not (RUN_MU or RUN_RT or RUN_SP):
         table += seper
-        run_time = Run_Time(COUNT, FF, CC)
+        run_time = Run_Time(ALPHA, BETA, DEPTH, RATIO, COUNT, FF, CC)
         ## ADD RUN TIME REPORT BY CALLING get_analysis FUNCTION ##
         table += run_time.get_analysis()
     
     #IF NO TEST SPECIFIED OR MEMORY USAGE SPECIFIED, EXECUTE MEMORY USAGE
     if RUN_MU or not (RUN_MU or RUN_RT or RUN_SP):
         #table += seper
-        mem_usage = Mem_Usage(COUNT, FF, CC)
+        mem_usage = Mem_Usage(ALPHA, BETA, DEPTH, RATIO, COUNT, FF, CC)
         ## ADD MEMORY USAGE REPORT BY CALLING get_analysis FUNCTION ##
         #table += mem_usage.get_analysis()
     
@@ -369,7 +410,7 @@ if __name__ == '__main__':
     if RUN_VS or not (RUN_MU or RUN_RT or RUN_SP):
         table += seper
         #Default test just returns the solution path lengths
-        versus = Versus(COUNT, FF, CC)
+        versus = Versus(ALPHA, BETA, DEPTH, RATIO, COUNT, FF, CC)
         table += versus.get_analysis()
     
     #Print to terminal if a log file was not specified
