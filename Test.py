@@ -10,7 +10,7 @@ class Inputs:
 
 ## CREATE ARGUMENT PARSING OBJECT ##
 parser = argparse.ArgumentParser(description="This program provides tools to evaluate the imperfect real-time pruning algorithms implemented")
-parser.add_argument("--runs",   metavar="INT", dest="runs",   nargs=1, default=[10],type=int,  help="Number of games to run")
+parser.add_argument("--runs",   metavar="INT", dest="runs",   nargs=1, default=[3],type=int,  help="Number of games to run")
 parser.add_argument("--log",    metavar="FILE", dest="file",  nargs=1, default=[""],type=str,  help="Specify a log file (default will print to terminal)")
 parser.add_argument("-rt",         dest="rt",     action='store_true', default=False, help="Execute Run-Time analysis (default is Cuttoff Search vs ForwardPruning)")
 parser.add_argument("-mu",         dest="mu",     action='store_true', default=False, help="Execute Memory Usage analysis (default is Cuttoff Search vs ForwardPruning)")
@@ -51,39 +51,28 @@ class Mem_Usage:
         
     def get_analysis(self):
         '''This function generates the analysis for the memory usage in terms
-        of nodes.  This function returns in the form of a string.'''
-        MemInfo_of = [[],[]]
-        BFS,BI    = 0, 1
-        ## EXECUTE BREADTH FIRST SEARCH AND BIDIRECTIONAL MEMORY-USAGE ANALYSIS ##
-        for h in self.heights:
-            ## SETUP AND STORE INSTANCE FOR MEMORY USAGE FOR HEIGHT h ##
-            answer_bfs = breadth_first_search(Towers_Of_Hanoi(length=self.towers,height=h,explore=self.explore),
-                                              return_mem_usage=True)
-            ## GET AND STORE MEMORY USAGE METRICS ##
-            BFS_mem = answer_bfs[-1]
-            MemInfo_of[BFS].append(BFS_mem)
-            
-            answer_bi = bidirectional_search(Towers_Of_Hanoi(length=self.towers,height=h,explore=self.explore),
-                                             Towers_Of_Hanoi(length=self.towers,height=h,swap=True,explore=self.explore),
-                                             return_mem_usage=True)
-            BI_mem  = answer_bi[-1]
-            MemInfo_of[BI].append(BI_mem)
-            
+        of moves evaluated.  This function returns in the form of a string.'''
+        r = 0
+        w = 0
+        tot_move = [0,0]
+        runs = self.runs
+        while runs > 0:
+            self.faceoff()
+            tot_move[0] += self.AI1.count
+            tot_move[1] += self.AI2.count
+            runs -= 1
         
+        avg_mov = [tot_move[0]/self.runs,tot_move[1]/self.runs]
+        ## CREATE OUTPUT RUN-TIME ANALYSIS ##
+        analysis =  ' vs. '.join(self.names)+ " Memory Usage Analysis\n\n"
+        analysis += "\tTotal Moves over " + str(self.runs) + " runs:\n"
+        analysis += "\t\t" + self.names[0] + ":\t" + str(tot_move[0]) + "\n"
+        analysis += "\t\t" + self.names[1] + ":\t" + str(tot_move[1])  + "\n\n"
+        analysis += "\tAverage Moves per Game:\n"
+        analysis += "\t\t" + self.names[0] + ":\t" + str(avg_mov[0]) + "\n"
+        analysis += "\t\t" + self.names[1] + ":\t" + str(avg_mov[1])  + "\n\n"
         ## FORMAT ANALYSIS FOR MEMORY USAGE ##
         analysis = "Memory Usage Test Results\n\n"
-        for i,h in enumerate(self.heights):
-            analysis += "\tFor Height = " + str(h) + ":\n"
-            analysis += "\t\tBreadth-First-Search sizes:\n"
-            analysis += "\t\t  Graph:\t\t"        + str(MemInfo_of[BFS][i][0]) + "\n"
-            if self.explore:
-                analysis += "\t\t  Explored:\t\t" + str(MemInfo_of[BFS][i][1]) + "\n"
-            analysis += "\t\t  Frontier Max:\t"   + str(MemInfo_of[BFS][i][2]) + "\n"
-            analysis += "\t\tBidirectional sizes:\n"
-            analysis += "\t\t  Graph:\t\t"        + str(MemInfo_of[BI][i][0]) + "\n"
-            if self.explore:
-                analysis += "\t\t  Explored:\t\t" + str(MemInfo_of[BI][i][1]) + "\n"
-            analysis += "\t\t  Frontier Max:\t"   + str(MemInfo_of[BI][i][2]) + "\n\n"
         
         ## RETURN THE MEMORY USAGE ANALYSIS AS A STRING ##
         return analysis
@@ -103,12 +92,7 @@ class Mem_Usage:
             action          = self.AI1.Search(self.state, self.player, dice)
             if action != None:
                 self.state.result(action, self.enemy)
-                print("Computer has performed the following moves: {0}".format(action))
-            else:
-                print("The Computer has no valid moves, passing turn...")
-            #Print the board for the player to see!
-            writeBoard(self.state.redBoard, self.state.whiteBoard)
-            #input("Press Enter to continue...")
+                
             if self.state.isGameOver():
                 not_game_over = False
                 break
@@ -118,40 +102,8 @@ class Mem_Usage:
             action          = self.AI2.Search(self.state, self.enemy, dice)
             if action != None:
                 self.state.result(action, self.enemy)
-                print("Computer has performed the following moves: {0}".format(action))
-            else:
-                print("The Computer has no valid moves, passing turn...")
-            #Print the board for the player to see!
-            writeBoard(self.state.redBoard, self.state.whiteBoard)
-            #input("Press Enter to continue...")
-        
-        if self.getWinner() == "w":
-            print("White Wins!!!")
-        elif self.getWinner() == "r":
-            print("Red Wins!!!")
-        else:
-            print("Nobody Wins!!!")
     
-    def getWinner(self):
-        winner = 1
-        for i in range(24):
-            if(self.state.redBoard[i] != 0):
-                winner = 0
-                break
 
-        if (winner == 1):
-            return "r"
-            
-        winner = 2
-        for i in range(24):
-            if(self.state.whiteBoard[i] != 0):
-                winner = 0
-                break
-
-        if (winner == 2):
-            return "w"
-
-        return "n"
     
 class Versus:
     def __init__(self,alpha,beta,depth,ratio,runs,FF,CC):
@@ -276,24 +228,6 @@ class Run_Time:
         w =  [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2] 
         r =  [0,2,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,3,0,5,0,0,0,0,0]
         self.state = State(r,w)
-        
-    def get_analysis(self):
-        r = 0
-        w = 0
-        runs = self.runs
-        while runs > 0:
-            winner = self.faceoff()
-            if winner == "r":
-                r += 1
-            elif winner == "w":
-                w += 1
-            runs -= 1
-            
-        analysis =  ' vs. '.join(self.names)+ " Win/Loss Analysis\n\n"
-        analysis += "\tWins over " + str(self.runs) + " runs:\n"
-        analysis += "\t\t" + self.names[0] + ":\t" + str(r) + "\n"
-        analysis += "\t\t" + self.names[1] + ":\t" + str(w)  + "\n\n"
-        return analysis
     
     def faceoff(self):
         self.player = 0
@@ -311,7 +245,7 @@ class Run_Time:
             end   = time.time()
             moves_r += 1
             times_r  += (end - start)
-            if action != None:
+            if action1 != None:
                 self.state.result(action1, self.enemy)
             #Check if the game is over
             if self.state.isGameOver():
@@ -367,7 +301,7 @@ if __name__ == '__main__':
     CC      = inputs.cc
     COUNT   = inputs.runs[0]
     LOGFILE = inputs.file[0]
-    RUN_SP  = inputs.vs
+    RUN_VS  = inputs.vs
     RUN_RT  = inputs.rt
     RUN_MU  = inputs.mu
     ALPHA   = inputs.alpha[0]
@@ -376,7 +310,7 @@ if __name__ == '__main__':
     RATIO   = inputs.ratio[0]
     ## CHECK VALIDITY OF COMMAND LINE ARGS ##
     invalid = 0
-    if COUNT < 1 and (RUN_ALL or RUN_RT):
+    if COUNT < 1:
         print("Invalid Execution Count: Number of executions must be greater than 1 to actually run")
         invalid += 1
     extension = LOGFILE.split(".")[-1]
@@ -393,21 +327,21 @@ if __name__ == '__main__':
     table += seper
     
     #IF NO TEST SPECIFIED OR RUNTIME SPECIFIED, EXECUTE RUNTIME
-    if RUN_RT or not (RUN_MU or RUN_RT or RUN_SP):
+    if RUN_RT or not (RUN_MU or RUN_RT or RUN_VS):
         table += seper
         run_time = Run_Time(ALPHA, BETA, DEPTH, RATIO, COUNT, FF, CC)
         ## ADD RUN TIME REPORT BY CALLING get_analysis FUNCTION ##
         table += run_time.get_analysis()
     
     #IF NO TEST SPECIFIED OR MEMORY USAGE SPECIFIED, EXECUTE MEMORY USAGE
-    if RUN_MU or not (RUN_MU or RUN_RT or RUN_SP):
-        #table += seper
+    if RUN_MU or not (RUN_MU or RUN_RT or RUN_VS):
+        table += seper
         mem_usage = Mem_Usage(ALPHA, BETA, DEPTH, RATIO, COUNT, FF, CC)
         ## ADD MEMORY USAGE REPORT BY CALLING get_analysis FUNCTION ##
-        #table += mem_usage.get_analysis()
+        table += mem_usage.get_analysis()
     
     #IF NO TEST SPECIFIED OR SOLUTION PATH SPECIFIED, EXECUTE SOLUTION PATH
-    if RUN_VS or not (RUN_MU or RUN_RT or RUN_SP):
+    if RUN_VS or not (RUN_MU or RUN_RT or RUN_VS):
         table += seper
         #Default test just returns the solution path lengths
         versus = Versus(ALPHA, BETA, DEPTH, RATIO, COUNT, FF, CC)
