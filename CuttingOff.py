@@ -23,13 +23,12 @@ class CuttingOff:
         if self.Cuttoff_Test(state, depth + 1):
             value = state.score(self.player)
             return value
-        v     = -193
-        v_max = -1000
+        v     = -100000
+        v_max = -100000
         if diceroll == None:
             """actionss = state.actions(player, diceroll)
             self.printArray(actionss)"""
             for actions in state.actions(self.player, diceroll):
-                
                 total_value = 0
                 #print("All actions: " + str(actions))
                 for die1 in range(len(actions)):
@@ -76,7 +75,7 @@ class CuttingOff:
             #Always produce score based off AI side
             value = state.score(self.player)
             return value
-        v     = 193
+        v     = 10000
         #Produce the enemy's actions
         for actions in state.actions(self.enemy, None):
             total_value = 0

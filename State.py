@@ -197,8 +197,9 @@ class State:
     def score(self, player):
         '''Computes/returns the score for the specified player's board (r or w)'''
         
-        barConst = 100
+        barConst = 250
         doorConst = 50
+        singletonConst = 25
         bearConst = 10
         moveForwardConst = 1
         
@@ -210,16 +211,22 @@ class State:
         scores[1] += self.boards[0][0] * barConst
         
         for index in range(1, 25):
-            
-            self.boards[0] += index * self.boards[0]
-            self.boards[1] += index * self.boards[1]
-            
+            '''
+            scores[0] += index * self.boards[0][index]
+            scores[1] += index * self.boards[1][index]
+            '''
             '''Increase score if pieces are doored (stacked)'''
             if self.boards[0][index] > 1:
-                scores[0] += doorConst
+                scores[0] += doorConst / self.boards[0][index]
                 
             if self.boards[1][index] > 1:
-                scores[1] += doorConst
+                scores[1] += doorConst / self.boards[1][index]
+                
+            if self.boards[0][index] == 1:
+                scores[0] -= singletonConst
+                
+            if self.boards[1][index] == 1:
+                scores[1] -= singletonConst
                 
         if self.isBearingOff(0):
             scores[0] += bearConst

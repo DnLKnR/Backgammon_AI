@@ -11,8 +11,8 @@ class Inputs:
 
 ## CREATE ARGUMENT PARSING OBJECT ##
 parser = argparse.ArgumentParser(description="This program executes puzzles ")
-parser.add_argument("-a",metavar="INT", dest="alpha",  nargs=1, default=[-1000], type=int,help="Specify an alpha value for Alpha-Beta Pruning")
-parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[1000],   type=int,help="Specify an beta value for Alpha-Beta Pruning")
+parser.add_argument("-a",metavar="INT", dest="alpha",  nargs=1, default=[-100000], type=int,help="Specify an alpha value for Alpha-Beta Pruning")
+parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[100000],   type=int,help="Specify an beta value for Alpha-Beta Pruning")
 parser.add_argument("-B",metavar="INT", dest="best",   nargs=1, default=[3],   type=int,help="Specify an best-N count value for Forward Pruning")
 parser.add_argument("-d",metavar="INT", dest="depth",  nargs=1, default=[3],   type=int,help="Specify a cutt-off depth for the AI algorithm")
 parser.add_argument("-P", metavar="NAME", dest="pruning",nargs=1, default=["CO"],  type=str, help="Specify a pruning algorithm (CuttingOff, ForwardPruning)")
@@ -142,7 +142,7 @@ class Driver:
                 self.state.result(action, self.enemy)
                 print("Computer has performed the following moves: {0}".format(action))
             else:
-                print("Computer has no valid moves, passing turn...")
+                print("The Computer has no valid moves, passing turn...")
             
         if self.getWinner() == "w":
             print("White Wins!!!")
@@ -155,7 +155,7 @@ class Driver:
     def getWinner(self):
         winner = 1
         for i in range(24):
-            if(self.state.redBoard[i] != 0):
+            if(self.redBoard[i] != 0):
                 winner = 0
                 break
 
@@ -164,7 +164,7 @@ class Driver:
             
         winner = 2
         for i in range(24):
-            if(self.state.whiteBoard[i] != 0):
+            if(self.whiteBoard[i] != 0):
                 winner = 0
                 break
 
@@ -191,7 +191,7 @@ class Driver:
                 self.state.result(action, self.enemy)
                 print("Computer has performed the following moves: {0}".format(action))
             else:
-                print("Computer has no valid moves, passing turn...")
+                print("The Computer has no valid moves, passing turn...")
             #Print the board for the player to see!
             writeBoard(self.state.redBoard, self.state.whiteBoard)
             #input("Press Enter to continue...")
@@ -206,7 +206,7 @@ class Driver:
                 self.state.result(action, self.enemy)
                 print("Computer has performed the following moves: {0}".format(action))
             else:
-                print("Computer has no valid moves, passing turn...")
+                print("The Computer has no valid moves, passing turn...")
             #Print the board for the player to see!
             writeBoard(self.state.redBoard, self.state.whiteBoard)
             #input("Press Enter to continue...")
