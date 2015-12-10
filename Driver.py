@@ -89,7 +89,7 @@ class Driver:
             #AI Action
             print("Their Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
-            action          = self.AI.Search(self.state, self.enemy, dice)
+            action          = self.AI1.Search(self.state, self.enemy, dice)
             self.state.result(action, self.enemy)
             print("Computer has performed the following moves: {0}".format(action))
         else:
@@ -166,7 +166,7 @@ class Driver:
     def getWinner(self):
         winner = 1
         for i in range(24):
-            if(self.redBoard[i] != 0):
+            if(self.state.redBoard[i] != 0):
                 winner = 0
                 break
 
@@ -175,7 +175,7 @@ class Driver:
             
         winner = 2
         for i in range(24):
-            if(self.whiteBoard[i] != 0):
+            if(self.state.whiteBoard[i] != 0):
                 winner = 0
                 break
 

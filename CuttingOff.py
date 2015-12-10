@@ -64,7 +64,6 @@ class CuttingOff:
                 undo_actions = state.result(action, self.player)
                 total_value = self.Min_Value(state, alpha, beta, depth + 1)
                 state.undo(undo_actions)
-                print("For Action = {0}, V is: {1}".format(action, total_value))
                 v = max(v, total_value)
                 
                 #v,action = max([v], self.Min_Value(self.Result(state, action), alpha, beta, depth + 1), key=lambda x: x[0])

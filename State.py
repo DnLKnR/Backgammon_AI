@@ -15,6 +15,7 @@ rolls =    [
            ]
 
 '''
+import sys
 
 class State:
     def __init__(self, redBoard, whiteBoard):
@@ -44,7 +45,10 @@ class State:
         undos = []
         enemy  = int(not player)
         for move in action:
-            i,j  = move
+            if len(move) < 3:
+                continue
+            i,j,player  = move
+            enemy  = int(not player)
             if j != -1:
                 self.boards[player][j]  += 1
             
@@ -58,9 +62,8 @@ class State:
                 self.boards[enemy][0] += 1
                 #Provide undo tuple, (new index, old index, board index)
                 undos.append((0,j,enemy))
-        
         #return the special formatted actions
-        return undos
+        return list(reversed(undos))
     
     def actions(self, player, diceroll):
         '''Returns a list of all possible actions from this state'''
@@ -70,11 +73,8 @@ class State:
             all_actions  = self.initializeActionsArray()
             for die1 in range(1,7):
                 for first_action in self.moves(die1, player):
-                #first_actions = self.moves(die1, boards, player_index)
-                    #print("Before Action:\t{0}".format(boards[player_index]))
                     ''' Apply first action to the board(s) '''
-                    undo_actions = self.do(first_action, player)
-                    #print("After Action:\t{0}".format(boards[player_index]))
+                    undo_actions = self.result([first_action], player)
                     for die2 in range(1,7):
                         ''' Get the second actions '''
                         second_actions = self.moves(die2, player)
@@ -86,7 +86,6 @@ class State:
                             
                     ''' Undo first_action to the board(s) '''
                     self.undo(undo_actions)
-                    #print("After Undo:\t{0}".format(boards[player_index]))
             return all_actions
         #if a dice roll is provided
         else:
@@ -95,15 +94,12 @@ class State:
             ''' loop through first actions '''
             for first_action in self.moves(die1, player):
                 ''' Apply first action to the board(s) '''
-                #print("Before Action:\t{0}".format(boards[player_index]))
                 undo_actions = self.do(first_action, player)
-                #print("After Action:\t{0}".format(boards[player_index]))
                 ''' Get second actions and store the action set '''
                 for second_action in self.moves(die2, player):
                     actions.append([first_action,second_action])
                 ''' Undo first_action to the board(s) '''
                 self.undo(undo_actions)
-                #print("After Undo:\t{0}".format(boards[player_index]))
             return actions
     
     
@@ -118,42 +114,43 @@ class State:
                 j = 25 - die
             #if move allowed
             if (self.boards[enemy][j] <= 1):
-                moves_list.append((0, j))
+                moves_list.append((0, j, player))
         
         elif self.isBearingOff(player):
             if player == 0:
                 i = 25 - die
                 #if red has a piece at that location, they can remove it
-                if self.boards[player][i] > 0:
-                    moves_list.append((i, -1))
+                if self.boards[0][i] > 0:
+                    moves_list.append((i, -1, 0))
             
             elif player == 1:
                 i = die
-                if self.boards[player][i] > 0:
-                    moves_list.append((i, -1))
+                if self.boards[1][i] > 0:
+                    moves_list.append((i, -1, 1))
             
             else:
                 print("Error: Invalid player index")    
             
         
         else:
-            for i in range (1, 25):
+            for i in range (24, 0, -1):
                 #if white can move from index i with die2
                 if player == 0:
-                    if (self.boards[player][i] > 0 and i + die < 25 and self.boards[enemy][i + die] < 2):
+                    if (self.boards[0][i] > 0 and i + die < 25 and self.boards[1][i + die] < 2):
                         j = i + die
-                        moves_list.append((i, j))
+                        moves_list.append((i, j, 0))
                 if player == 1:
-                    if (self.boards[player][i] > 0 and i - die > 0 and self.boards[enemy][i - die] < 2):
+                    if (self.boards[1][i] > 0 and i - die > 0 and self.boards[0][i - die] < 2):
                         j = i - die
-                        moves_list.append((i, j))
+                        moves_list.append((i, j, 1))
         return moves_list
     
     def do(self, move, player):
         '''This function executes a single move and returns a list of moves necessary to undo it'''
         enemy  = int(not player)
         undos = []
-        i,j  = move
+        i,j,player  = move
+        enemy  = int(not player)
         if self.boards[enemy][j] > 1:
             return undos
         #Check if move is not bearing off
@@ -170,7 +167,7 @@ class State:
             #Provide undo tuple, (new index, old index, board index)
             undos.append((0,j,enemy))
         #return the special formatted actions
-        return undos
+        return list(reversed(undos))
     
     def undo(self, moves):
         for move in moves:
@@ -182,6 +179,7 @@ class State:
                 
             #Place back onto the old piece index
             self.boards[player][j]  += 1
+        #self.pieceCount(player, "State.undo()")
     
     def score(self, player):
         '''Computes/returns the score for the specified player's board (r or w)'''
@@ -217,7 +215,6 @@ class State:
             scores[1] += bearConst  
         
         value =  scores[player] - scores[enemy]
-        
         return value
     
     def isBearingOff(self, player):
@@ -248,7 +245,7 @@ class State:
             
         whiteWon = True
         for i in range(24):
-            if self.whiteBoard[i] > 0:
+            if self.boards[1][i] > 0:
                 whiteWon = False
                 break
         if whiteWon:
@@ -258,4 +255,3 @@ class State:
     def initializeActionsArray(self):
         array = [[[] for i in range(1, j + 1)] for j in range(1, 7)]
         return array
-    
