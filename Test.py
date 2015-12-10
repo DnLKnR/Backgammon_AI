@@ -18,9 +18,9 @@ parser.add_argument("-vs",         dest="vs",     action='store_true', default=F
 parser.add_argument("-ff",         dest="ff",     action='store_true', default=False, help="Execute Forward Pruning Versus Itself Analysis (Wins/Loss)")
 parser.add_argument("-cc",         dest="cc",     action='store_true', default=False, help="Execute Cuttoff Search Versus Itself Versus  Analysis (Wins/Loss)")
 parser.add_argument("-a",metavar="INT", dest="alpha",  nargs=1, default=[-100000], type=int,help="Specify an alpha value for Alpha-Beta Pruning")
-parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[100000],   type=int,help="Specify an beta value for Alpha-Beta Pruning")
-parser.add_argument("-R",metavar="FLOAT", dest="ratio",   nargs=1, default=[0.5],   type=int,help="Specify an Remove ratio for Random Forward Pruning")
-parser.add_argument("-d",metavar="INT", dest="depth",  nargs=1, default=[3],   type=int,help="Specify a cutt-off depth for the AI algorithm")
+parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[100000],   type=int,help="Specify a beta value for Alpha-Beta Pruning")
+parser.add_argument("-R",metavar="FLOAT", dest="ratio",   nargs=1, default=[0.5],   type=int,help="Specify a Remove ratio for Random Forward Pruning")
+parser.add_argument("-d",metavar="INT", dest="depth",  nargs=1, default=[3],   type=int,help="Specify a cut-off depth for the AI algorithm")
 
 class Mem_Usage:
     def __init__(self,alpha,beta,depth,ratio,runs,FF,CC):
@@ -307,12 +307,12 @@ class Run_Time:
             #AI1 Action
             dice            = [random.randint(1,6), random.randint(1,6)]
             start = time.time()
-            action          = self.AI1.Search(self.state, self.player, dice)
+            action1          = self.AI1.Search(self.state, self.player, dice)
             end   = time.time()
             moves_r += 1
             times_r  += (end - start)
             if action != None:
-                self.state.result(action, self.enemy)
+                self.state.result(action1, self.enemy)
             #Check if the game is over
             if self.state.isGameOver():
                 not_game_over = False
@@ -320,12 +320,12 @@ class Run_Time:
             #AI2 Action
             dice            = [random.randint(1,6), random.randint(1,6)]
             start = time.time()
-            action          = self.AI2.Search(self.state, self.enemy, dice)
+            action2          = self.AI2.Search(self.state, self.enemy, dice)
             end   = time.time()
             moves_w += 1
             times_w  += (end - start)
-            if action != None:
-                self.state.result(action, self.enemy)
+            if action2 != None:
+                self.state.result(action2, self.enemy)
         
         return (moves_r,moves_w,times_r,times_w)
     

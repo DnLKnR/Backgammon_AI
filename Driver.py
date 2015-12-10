@@ -197,10 +197,10 @@ class Driver:
             #AI Action
             print("Red Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
-            action          = self.AI1.Search(self.state, self.player, dice)
-            if action != None:
-                self.state.result(action, self.enemy)
-                print("Computer has performed the following moves: {0}".format(action))
+            action1          = self.AI1.Search(self.state, self.player, dice)
+            if action1 != None:
+                self.state.result(action1, self.enemy)
+                print("Computer has performed the following moves: {0}".format(action1))
             else:
                 print("The Computer has no valid moves, passing turn...")
             #Print the board for the player to see!
@@ -212,10 +212,10 @@ class Driver:
             #AI Action
             print("White Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
-            action          = self.AI2.Search(self.state, self.enemy, dice)
-            if action != None:
-                self.state.result(action, self.enemy)
-                print("Computer has performed the following moves: {0}".format(action))
+            action2          = self.AI2.Search(self.state, self.enemy, dice)
+            if action2 != None:
+                self.state.result(action2, self.enemy)
+                print("Computer has performed the following moves: {0}".format(action2))
             else:
                 print("The Computer has no valid moves, passing turn...")
             #Print the board for the player to see!

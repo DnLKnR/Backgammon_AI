@@ -27,13 +27,14 @@ class RandomForwardPruning:
         v     = -100000
         v_max = -100000
         if diceroll == None:
-            actions = self.Random_Remove(state.actions(self.player, diceroll))
-            for action in actions:
+            actions = state.actions(self.player, diceroll)
+            for action in self.Random_Remove(actions):
                 total_value = 0
                 #print("All actions: " + str(actions))
                 for die1 in range(len(action)):
                     for die2 in range(len(action[die1])):
-                        if len(actions[die1][die2]) == 0:
+                        print("test")
+                        if len(action[die1][die2]) == 0:
                             continue
                         undo_actions = state.result(action[die1][die2], self.player)
                         value = self.Min_Value(state, alpha, beta, depth + 1)
@@ -77,8 +78,8 @@ class RandomForwardPruning:
             return value
         v     = 100000
         #Produce the enemy's actions and remove a ratio of them
-        actions = self.Random_Remove(state.actions(self.enemy, None))
-        for action in actions:
+        actions = state.actions(self.enemy, None)
+        for action in self.Random_Remove(actions):
             total_value = 0
             #loop through possible die rolls
             for die1 in range(len(action)):
@@ -107,7 +108,7 @@ class RandomForwardPruning:
                 index = random.randint(0,len(actions) - 1)
                 die1 = random.randint(0,len(actions[index]) - 1)
                 die2 = random.randint(0,len(actions[index][die1]) - 1)
-                actions[index][die1].remove(actions[index][die1][die2])
+                del actions[index][die1][die2]
                 moves -= 1
                 #print(actions[index][die1].pop(die2))
             except:
