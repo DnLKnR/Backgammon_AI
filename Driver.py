@@ -29,7 +29,7 @@ class Driver:
         elif PruningType.lower() in ["fc","forwardpruning"]:
             self.AI = ForwardPruning(self.Alpha, self.Beta, self.Best)
         else:
-            Print("Error: {0} is not a valid Pruning Type".format(PruningType))
+            print("Error: {0} is not a valid Pruning Type".format(PruningType))
             sys.exit(1)
             
         self.__construct__()
@@ -138,8 +138,11 @@ class Driver:
             dice            = [random.randint(1,6),random.randint(1,6)]
             print("Their Roll: {0}".format(', '.join([str(x) for x in dice])))
             action          = self.AI.Search(self.state, self.enemy, dice)
-            self.state.result(action, self.enemy)
-            print("Computer has performed the following moves: {0}".format(action))
+            if action != None:
+                self.state.result(action, self.enemy)
+                print("Computer has performed the following moves: {0}".format(action))
+            else:
+                print("Computer has no valid moves, passing turn...")
             
         if self.getWinner() == "w":
             print("White Wins!!!")
@@ -152,7 +155,7 @@ class Driver:
     def getWinner(self):
         winner = 1
         for i in range(24):
-            if(self.redBoard[i] != 0):
+            if(self.state.redBoard[i] != 0):
                 winner = 0
                 break
 
@@ -161,7 +164,7 @@ class Driver:
             
         winner = 2
         for i in range(24):
-            if(self.whiteBoard[i] != 0):
+            if(self.state.whiteBoard[i] != 0):
                 winner = 0
                 break
 
@@ -184,8 +187,11 @@ class Driver:
             print("Red Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI.Search(self.state, self.player, dice)
-            self.state.result(action, self.player)
-            print("Computer has performed the following moves: {0}".format(action))
+            if action != None:
+                self.state.result(action, self.enemy)
+                print("Computer has performed the following moves: {0}".format(action))
+            else:
+                print("Computer has no valid moves, passing turn...")
             #Print the board for the player to see!
             writeBoard(self.state.redBoard, self.state.whiteBoard)
             #input("Press Enter to continue...")
@@ -196,8 +202,11 @@ class Driver:
             print("White Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI.Search(self.state, self.enemy, dice)
-            self.state.result(action, self.enemy)
-            print("Computer has performed the following moves: {0}".format(action))
+            if action != None:
+                self.state.result(action, self.enemy)
+                print("Computer has performed the following moves: {0}".format(action))
+            else:
+                print("Computer has no valid moves, passing turn...")
             #Print the board for the player to see!
             writeBoard(self.state.redBoard, self.state.whiteBoard)
             #input("Press Enter to continue...")
