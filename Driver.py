@@ -1,7 +1,7 @@
 from CuttingOff     import CuttingOff
 from State          import State
 from Visualizer     import writeBoard
-from ForwardPruning import ForwardPruning
+from ForwardPruning import RandomForwardPruning
 from time           import time
 import sys, timeit, argparse, sys, random
 
@@ -13,24 +13,35 @@ class Inputs:
 parser = argparse.ArgumentParser(description="This program executes puzzles ")
 parser.add_argument("-a",metavar="INT", dest="alpha",  nargs=1, default=[-100000], type=int,help="Specify an alpha value for Alpha-Beta Pruning")
 parser.add_argument("-b",metavar="INT", dest="beta",   nargs=1, default=[100000],   type=int,help="Specify an beta value for Alpha-Beta Pruning")
-parser.add_argument("-B",metavar="INT", dest="best",   nargs=1, default=[3],   type=int,help="Specify an best-N count value for Forward Pruning")
+parser.add_argument("-R",metavar="FLOAT", dest="ratio",   nargs=1, default=[0.5],   type=int,help="Specify an Remove ratio for Random Forward Pruning")
 parser.add_argument("-d",metavar="INT", dest="depth",  nargs=1, default=[3],   type=int,help="Specify a cutt-off depth for the AI algorithm")
 parser.add_argument("-P", metavar="NAME", dest="pruning",nargs=1, default=["CO"],  type=str, help="Specify a pruning algorithm (CuttingOff, ForwardPruning)")
-parser.add_argument("--face-off", dest="faceoff", action='store_true', default=False, help="Execute Memory Usage analysis (TBA for data collection)")
+parser.add_argument("--face-off", dest="faceoff", action='store_true', default=False, help="Specify to have both AI algorithms play against eachother")
+parser.add_argument("--FF", dest="ff", action='store_true', default=False, help="Specify to have Forward Pruing play against itself")
+parser.add_argument("--CC", dest="cc", action='store_true', default=False, help="Specify to have Cuttoff Search play against itself")
 
 class Driver:
-    def __init__(self, Alpha, Beta, Best, Depth, PruningType):
+    def __init__(self, Alpha, Beta, Depth, Ratio, PruningType, FF, CC):
         self.Alpha = Alpha
         self.Beta  = Beta 
         self.Depth = Depth
-        self.Best  = Best
+        self.Ratio = Ratio
         if PruningType.lower() in ["co","cuttingoff"]:
-            self.AI = CuttingOff(self.Alpha, self.Beta, self.Depth)
+            self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
         elif PruningType.lower() in ["fc","forwardpruning"]:
-            self.AI = ForwardPruning(self.Alpha, self.Beta, self.Best)
+            self.AI1 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
         else:
             print("Error: {0} is not a valid Pruning Type".format(PruningType))
             sys.exit(1)
+        if CC:
+            self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
+            self.AI2 = CuttingOff(self.Alpha, self.Beta, self.Depth)
+        elif FF:
+            self.AI1 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
+            self.AI2 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
+        else:
+            self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
+            self.AI2 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
             
         self.__construct__()
             
@@ -137,7 +148,7 @@ class Driver:
             #AI Action
             dice            = [random.randint(1,6),random.randint(1,6)]
             print("Their Roll: {0}".format(', '.join([str(x) for x in dice])))
-            action          = self.AI.Search(self.state, self.enemy, dice)
+            action          = self.AI1.Search(self.state, self.enemy, dice)
             if action != None:
                 self.state.result(action, self.enemy)
                 print("Computer has performed the following moves: {0}".format(action))
@@ -186,7 +197,7 @@ class Driver:
             #AI Action
             print("Red Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
-            action          = self.AI.Search(self.state, self.player, dice)
+            action          = self.AI1.Search(self.state, self.player, dice)
             if action != None:
                 self.state.result(action, self.enemy)
                 print("Computer has performed the following moves: {0}".format(action))
@@ -201,7 +212,7 @@ class Driver:
             #AI Action
             print("White Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
-            action          = self.AI.Search(self.state, self.enemy, dice)
+            action          = self.AI2.Search(self.state, self.enemy, dice)
             if action != None:
                 self.state.result(action, self.enemy)
                 print("Computer has performed the following moves: {0}".format(action))
@@ -217,14 +228,16 @@ class Driver:
             print("Red Wins!!!")
         else:
             print("Nobody Wins!!!")
+    
+    
 
 
 if __name__ == '__main__':
     inputs = Inputs()
     parser.parse_args(sys.argv[1:], namespace=inputs)
-    driver = Driver(inputs.alpha[0],inputs.beta[0],inputs.best[0],inputs.depth[0],inputs.pruning[0])
+    driver = Driver(inputs.alpha[0],inputs.beta[0],inputs.ratio[0],inputs.depth[0],inputs.pruning[0],inputs.ff,inputs.cc)
     try:
-        if inputs.faceoff:
+        if inputs.faceoff or inputs.ff or inputs.cc:
             driver.faceoff()
         else:
             driver.start()

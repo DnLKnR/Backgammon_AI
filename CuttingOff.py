@@ -26,8 +26,6 @@ class CuttingOff:
         v     = -100000
         v_max = -100000
         if diceroll == None:
-            """actionss = state.actions(player, diceroll)
-            self.printArray(actionss)"""
             for actions in state.actions(self.player, diceroll):
                 total_value = 0
                 #print("All actions: " + str(actions))
