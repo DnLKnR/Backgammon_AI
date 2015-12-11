@@ -72,7 +72,7 @@ class Mem_Usage:
         analysis += "\t\t" + self.names[0] + ":\t" + str(avg_mov[0]) + "\n"
         analysis += "\t\t" + self.names[1] + ":\t" + str(avg_mov[1])  + "\n\n"
         ## FORMAT ANALYSIS FOR MEMORY USAGE ##
-        analysis = "Memory Usage Test Results\n\n"
+        analysis += "Memory Usage Test Results\n\n"
         
         ## RETURN THE MEMORY USAGE ANALYSIS AS A STRING ##
         return analysis
@@ -90,9 +90,9 @@ class Mem_Usage:
             #AI Action
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI1.Search(self.state, self.player, dice)
-            writeBoard(self.state.boards[0],self.state.boards[1])
             if action != None:
                 self.state.result(action, self.enemy)
+            writeBoard(self.state.boards[0],self.state.boards[1])
                 
             if self.state.isGameOver():
                 not_game_over = False
@@ -100,9 +100,10 @@ class Mem_Usage:
             #AI Action
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI2.Search(self.state, self.enemy, dice)
-            writeBoard(self.state.boards[0],self.state.boards[1])
+            
             if action != None:
                 self.state.result(action, self.enemy)
+            writeBoard(self.state.boards[0],self.state.boards[1])
     
 
     
@@ -146,7 +147,7 @@ class Versus:
             
         analysis =  ' vs. '.join(self.names)+ " Win/Loss Analysis\n\n"
         analysis += "\tWins over " + str(self.runs) + " runs:\n"
-        analysis += "\t\tCuffoff Search:\t" + str(r) + "\n"
+        analysis += "\t\tCuffoff Search:\t\t" + str(r) + "\n"
         analysis += "\t\tForward Pruning:\t" + str(w)  + "\n\n"
         return analysis
     
@@ -162,9 +163,9 @@ class Versus:
             #AI1 Action
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI1.Search(self.state, self.player, dice)
-            writeBoard(self.state.boards[0],self.state.boards[1])
             if action != None:
                 self.state.result(action, self.enemy)
+            writeBoard(self.state.boards[0],self.state.boards[1])
             #Check if the game is over
             if self.state.isGameOver():
                 not_game_over = False
@@ -172,33 +173,29 @@ class Versus:
             #AI2 Action
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI2.Search(self.state, self.enemy, dice)
-            writeBoard(self.state.boards[0],self.state.boards[1])
             if action != None:
                 self.state.result(action, self.enemy)
-        
+            writeBoard(self.state.boards[0],self.state.boards[1])
+            
         input("Press Enter to continue")
         return self.getWinner()
     
     def getWinner(self):
-        winner = 2
+        '''returns the winner of the game'''
+        redWon = True
+        whiteWon = True
         for i in range(25):
-            if(self.state.redBoard[i] != 0):
-                winner = 0
-                break
-
-        if (winner == 0):
+            if self.state.boards[0][i] > 0:
+                redWon = False
+            if self.state.boards[1][i] > 0:
+                whiteWon = False
+            if not redWon and not whiteWon:
+                return "n"
+        if redWon:
             return "r"
             
-        winner = 2
-        for i in range(25):
-            if(self.state.whiteBoard[i] != 0):
-                winner = 0
-                break
-
-        if (winner == 1):
+        if whiteWon:
             return "w"
-
-        return "n"
     
 class Run_Time:
     def __init__(self,alpha,beta,depth,ratio,runs,FF,CC):

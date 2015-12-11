@@ -71,7 +71,8 @@ class State:
             #Store all actions
             all_actions  = self.initializeActionsArray()
             for die1 in range(1,7):
-                for first_action in self.moves(die1, player):
+                first_actions = self.moves(die1, player)
+                for first_action in first_actions:
                     ''' Apply first action to the board(s) '''
                     undo_actions = self.result([first_action], player)
                     for die2 in range(1,7):
@@ -85,6 +86,7 @@ class State:
                             
                     ''' Undo first_action to the board(s) '''
                     self.undo(undo_actions)
+                
             return all_actions
         #if a dice roll is provided
         else:
@@ -95,7 +97,10 @@ class State:
                 ''' Apply first action to the board(s) '''
                 undo_actions = self.do(first_action, player)
                 ''' Get second actions and store the action set '''
-                for second_action in self.moves(die2, player):
+                second_actions = self.moves(die2, player)
+                if len(second_actions) == 0:
+                    actions.append([first_action])
+                for second_action in second_actions:
                     actions.append([first_action,second_action])
                 ''' Undo first_action to the board(s) '''
                 self.undo(undo_actions)
@@ -234,22 +239,16 @@ class State:
     def isGameOver(self):
         '''returns true if the state is terminal (game over), else false'''
         redWon = True
+        whiteWon = True
         for i in range(25):
             if self.boards[0][i] > 0:
                 redWon = False
-                break
-        if redWon:
-            print("Red wins!")
-            return True
-            
-        whiteWon = True
-        for i in range(25):
             if self.boards[1][i] > 0:
                 whiteWon = False
-                break
-        if whiteWon:
-            print("White wins!")
-            return True
+            if not redWon and not whiteWon:
+                return False
+        
+        return (redWon or whiteWon)
 
     def initializeActionsArray(self):
         array = [[[] for i in range(1, j + 1)] for j in range(1, 7)]

@@ -31,7 +31,7 @@ class RandomForwardPruning:
         '''This function finds the action that leads to the overall
         best actions sets for the player'''
         self.count += 1
-        if self.Cuttoff_Test(state, depth + 1):
+        if self.Cuttoff_Test(state, depth):
             value = state.score(self.player)
             return value
         v     = -100000
@@ -85,7 +85,7 @@ class RandomForwardPruning:
         '''This function attempts to find the enemy's moves
         by minimizing the player's score.'''
         self.count += 1
-        if self.Cuttoff_Test(state, depth + 1):
+        if self.Cuttoff_Test(state, depth):
             #Always produce score based off AI side
             value = state.score(self.player)
             return value
