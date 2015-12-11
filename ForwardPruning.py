@@ -23,7 +23,7 @@ class RandomForwardPruning:
         #Reset action to None
         self.action = None
         #Begin the minimax search
-        v = self.Max_Value(state, self.alpha, self.beta, 0, diceroll)
+        v = self.Max_Value(state, self.alpha, self.beta, 1, diceroll)
         #Return the stored action from the search
         return self.action
             
