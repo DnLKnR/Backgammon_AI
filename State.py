@@ -40,10 +40,9 @@ class State:
         self.undo(undo_actions)
         return value
     
-    def result(self, action, player):
+    def result(self, action, ignore):
         '''Returns a list of actions necessary to undo the action performed'''
         undos = []
-        enemy  = int(not player)
         for move in action:
             if len(move) < 3:
                 continue
@@ -79,7 +78,7 @@ class State:
                         ''' Get the second actions '''
                         second_actions = self.moves(die2, player)
                         if(len(second_actions) == 0):
-                            all_actions[max(die1,die2) - 1][min(die1,die2) - 1].append([first_action,(0,0)])
+                            all_actions[max(die1,die2) - 1][min(die1,die2) - 1].append([first_action])
                         ''' Store the action set '''
                         for second_action in second_actions:
                             all_actions[max(die1,die2) - 1][min(die1,die2) - 1].append([first_action,second_action])
@@ -219,14 +218,14 @@ class State:
     
     def isBearingOff(self, player):
         if player == 0:
-            for position in self.boards[player][0:18]:
+            for position in self.boards[0][0:19]:
                 if position != 0:
                     return False
             
         elif player == 1:
             if self.boards[player][0] != 0:
                 return False
-            for position in self.boards[player][7:24]:
+            for position in self.boards[1][7:]:
                 if position != 0:
                     return False
         
@@ -235,7 +234,7 @@ class State:
     def isGameOver(self):
         '''returns true if the state is terminal (game over), else false'''
         redWon = True
-        for i in range(24):
+        for i in range(25):
             if self.boards[0][i] > 0:
                 redWon = False
                 break
@@ -244,7 +243,7 @@ class State:
             return True
             
         whiteWon = True
-        for i in range(24):
+        for i in range(25):
             if self.boards[1][i] > 0:
                 whiteWon = False
                 break

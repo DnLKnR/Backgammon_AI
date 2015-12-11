@@ -2,6 +2,7 @@ import argparse, sys, time, random
 from CuttingOff import CuttingOff
 from ForwardPruning import RandomForwardPruning
 from State import State
+from Visualizer import writeBoard
 
 
 ## CLASS FOR STORING COMMAND LINE ARGUMENTS ##
@@ -42,7 +43,6 @@ class Mem_Usage:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
             self.AI2 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
             self.names = ["CuttingOff","ForwardPruning"]
-        self.__construct__()
             
     def __construct__(self):
         w =  [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2] 
@@ -78,6 +78,7 @@ class Mem_Usage:
         return analysis
     
     def faceoff(self):
+        self.__construct__()
         self.player = 0
         self.enemy  = 1
         not_game_over = True
@@ -87,9 +88,9 @@ class Mem_Usage:
                 break
             dice            = [random.randint(1,6),random.randint(1,6)]
             #AI Action
-            print("Red Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI1.Search(self.state, self.player, dice)
+            writeBoard(self.state.boards[0],self.state.boards[1])
             if action != None:
                 self.state.result(action, self.enemy)
                 
@@ -97,9 +98,9 @@ class Mem_Usage:
                 not_game_over = False
                 break
             #AI Action
-            print("White Roll: {0}".format(', '.join([str(x) for x in dice])))
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI2.Search(self.state, self.enemy, dice)
+            writeBoard(self.state.boards[0],self.state.boards[1])
             if action != None:
                 self.state.result(action, self.enemy)
     
@@ -125,8 +126,6 @@ class Versus:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
             self.AI2 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
             self.names = ["CuttingOff","ForwardPruning"]
-    
-        self.__construct__()
             
     def __construct__(self):
         w =  [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2] 
@@ -152,6 +151,7 @@ class Versus:
         return analysis
     
     def faceoff(self):
+        self.__construct__()
         self.player = 0
         self.enemy  = 1
         not_game_over = True
@@ -162,6 +162,7 @@ class Versus:
             #AI1 Action
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI1.Search(self.state, self.player, dice)
+            writeBoard(self.state.boards[0],self.state.boards[1])
             if action != None:
                 self.state.result(action, self.enemy)
             #Check if the game is over
@@ -171,33 +172,30 @@ class Versus:
             #AI2 Action
             dice            = [random.randint(1,6), random.randint(1,6)]
             action          = self.AI2.Search(self.state, self.enemy, dice)
+            writeBoard(self.state.boards[0],self.state.boards[1])
             if action != None:
                 self.state.result(action, self.enemy)
         
-        if self.getWinner() == "w":
-            return "w"
-        elif self.getWinner() == "r":
-            return "r"
-        else:
-            return "n"
+        input("Press Enter to continue")
+        return self.getWinner()
     
     def getWinner(self):
-        winner = 1
-        for i in range(24):
+        winner = 2
+        for i in range(25):
             if(self.state.redBoard[i] != 0):
                 winner = 0
                 break
 
-        if (winner == 1):
+        if (winner == 0):
             return "r"
             
         winner = 2
-        for i in range(24):
+        for i in range(25):
             if(self.state.whiteBoard[i] != 0):
                 winner = 0
                 break
 
-        if (winner == 2):
+        if (winner == 1):
             return "w"
 
         return "n"
@@ -222,7 +220,6 @@ class Run_Time:
             self.AI1 = CuttingOff(self.Alpha, self.Beta, self.Depth)
             self.AI2 = RandomForwardPruning(self.Alpha, self.Beta, self.Depth, self.Ratio)
             self.names = ["CuttingOff","ForwardPruning"]
-        self.__construct__()
             
     def __construct__(self):
         w =  [0,0,0,0,0,0,5,0,3,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,2] 
@@ -230,6 +227,7 @@ class Run_Time:
         self.state = State(r,w)
     
     def faceoff(self):
+        self.__construct__()
         self.player = 0
         self.enemy  = 1
         moves_r,moves_w,times_r,times_w = 0,0,0,0
@@ -245,6 +243,7 @@ class Run_Time:
             end   = time.time()
             moves_r += 1
             times_r  += (end - start)
+            writeBoard(self.state.boards[0],self.state.boards[1])
             if action1 != None:
                 self.state.result(action1, self.enemy)
             #Check if the game is over
@@ -258,6 +257,7 @@ class Run_Time:
             end   = time.time()
             moves_w += 1
             times_w  += (end - start)
+            writeBoard(self.state.boards[0],self.state.boards[1])
             if action2 != None:
                 self.state.result(action2, self.enemy)
         
